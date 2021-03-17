@@ -1,0 +1,17 @@
+ARG centos=7.9.2009
+FROM aursu/rpmbuild:${centos}-build-systemd
+
+RUN yum -y install \
+        grub2 \
+        grubby \
+        initscripts \
+        linux-firmware \
+    && yum clean all && rm -rf /var/cache/yum
+
+RUN yum -y --enablerepo bintray-custom install \
+        kmod \
+    && yum clean all && rm -rf /var/cache/yum
+
+RUN /usr/bin/systemd-machine-id-setup \
+    && :> /etc/fstab \
+    && systemctl enable systemd-journald
