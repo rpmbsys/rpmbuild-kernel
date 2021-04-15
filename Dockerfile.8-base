@@ -1,4 +1,4 @@
-ARG centos=7.9.2009
+ARG centos=8.3.2011
 # image comes from rpmbuild-libtool project
 FROM aursu/rpmbuild:${centos}-build
 
@@ -6,12 +6,11 @@ USER root
 RUN yum -y install \
         asciidoc \
         audit-libs-devel \
+        bc \
         binutils-devel \
-        binutils-x86_64-linux-gnu \
         dwarves \
         elfutils-devel \
         gcc-plugin-devel \
-        gcc-x86_64-linux-gnu \
         gettext \
         hmaccalc \
         java-devel \
@@ -26,7 +25,7 @@ RUN yum -y install \
         pciutils-devel \
         perl-devel perl-generators "perl(ExtUtils::Embed)" \
         pesign \
-        python3-devel python-devel python-docutils \
+        python3-devel python3-docutils \
         xmlto \
         xz-devel \
         zlib-devel \
