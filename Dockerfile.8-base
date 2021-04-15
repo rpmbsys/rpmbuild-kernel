@@ -1,0 +1,33 @@
+ARG centos=7.9.2009
+# image comes from rpmbuild-libtool project
+FROM aursu/rpmbuild:${centos}-build
+
+USER root
+RUN yum -y install \
+        asciidoc \
+        audit-libs-devel \
+        binutils-devel \
+        binutils-x86_64-linux-gnu \
+        dwarves \
+        elfutils-devel \
+        gcc-plugin-devel \
+        gcc-x86_64-linux-gnu \
+        gettext \
+        hmaccalc \
+        java-devel \
+        libcap-devel \
+        libcap-ng-devel \
+        ncurses-devel \
+        net-tools \
+        newt-devel \
+        numactl-devel \
+        openssl \
+        openssl-devel \
+        pciutils-devel \
+        perl-devel perl-generators "perl(ExtUtils::Embed)" \
+        pesign \
+        python3-devel python-devel python-docutils \
+        xmlto \
+        xz-devel \
+        zlib-devel \
+    && yum clean all && rm -rf /var/cache/yum
