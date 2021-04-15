@@ -1,4 +1,5 @@
 ARG centos=7.9.2009
+# image comes from rpmbuild-libtool project
 FROM aursu/rpmbuild:${centos}-build-gcc8
 
 USER root
