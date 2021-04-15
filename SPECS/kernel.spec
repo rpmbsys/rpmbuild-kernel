@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For rawhide and/or a kernel built from an rc or git snapshot,
 # released_kernel should be 0.
 # For a stable, released kernel, released_kernel should be 1.
-%global released_kernel 0
+%global released_kernel 1
 
 %global distro_build 300
 
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.11.6
+%define rpmversion 5.11.14
 %define stableversion 5.11
 %define pkgrelease 300
 
@@ -2481,10 +2481,12 @@ fi\
 #
 %define kernel_variant_posttrans() \
 %{expand:%%posttrans %{?1:%{1}-}core}\
+%if 0%{?fedora}\
 if [ -x %{_sbindir}/weak-modules ]\
 then\
     %{_sbindir}/weak-modules --add-kernel %{KVERREL}%{?1:+%{1}} || exit $?\
 fi\
+%endif\
 %if 0%{?fedora} || 0%{?rhel} > 7\
 /bin/kernel-install add %{KVERREL}%{?1:+%{1}} /lib/modules/%{KVERREL}%{?1:+%{1}}/vmlinuz || exit $?\
 %endif\
@@ -2814,6 +2816,69 @@ fi
 #
 #
 %changelog
+* Wed Apr 14 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.14-0]
+- Quick hack to reset release to 0 (Justin M. Forbes)
+- Add clarity to rebase notes since that change was backed out (Justin M. Forbes)
+- drm/i915/gen11+: Only load DRAM information from pcode (José Roberto de Souza)
+- Add CONFIG_NVIDIA_CARMEL_CNP_ERRATUM to RHEL configs too (Justin M. Forbes)
+- Add config for CONFIG_NVIDIA_CARMEL_CNP_ERRATUM (Justin M. Forbes)
+
+* Sat Apr 10 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.13-15]
+- Re-enable PSR2 on Tigerlake with new workarounds from Intel (Lyude Paul)
+- Fedora: Enable CHARGER_GPIO on aarch64 too (Peter Robinson)
+- Fix build with patch for CVE-2021-30178 (Justin M. Forbes)
+- KVM: x86: hyper-v: Fix Hyper-V context null-ptr-deref (Wanpeng Li)
+
+* Wed Apr 07 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.12-14]
+- Backport of SOF audio hang fix for X1 Carbon 9 (Mark Pearson)
+- drm/amdgpu: check alignment on CPU page for bo map (Xℹ Ruoyao)
+- drm/amdgpu: Set a suitable dev_info.gart_page_size (Huacai Chen)
+- drm/amdgpu: fix offset calculation in amdgpu_vm_bo_clear_mappings() (Nirmoy Das)
+- Set CONFIG_XEN_MEMORY_HOTPLUG_LIMIT as required by 5.11.11 (Justin M. Forbes)
+
+* Tue Mar 30 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.11-13]
+- drm/i915: Disable LTTPR support when the DPCD rev < 1.4 (Imre Deak)
+- drm/i915/dp: Prevent setting the LTTPR LT mode if no LTTPRs are detected (Imre Deak)
+- drm/i915/ilk-glk: Fix link training on links with LTTPRs (Imre Deak)
+- redhat/mod-blacklist.sh: Fix floppy blacklisting (Hans de Goede)
+
+* Thu Mar 25 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.10-12]
+- drm/i915/tgl/psr: Disable PSR on Tigerlake for now (Lyude Paul)
+- Fedora: Turn off the SND_INTEL_BYT_PREFER_SOF option (Hans de Goede)
+- ASoC: intel: atom: Stop advertising non working S24LE support (Hans de Goede)
+- fix up RHEL config (Justin M. Forbes)
+
+* Wed Mar 24 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.9-11]
+- KVM: PPC: Book3S HV: Save and restore FSCR in the P9 path (Fabiano Rosas)
+- drm/nouveau/kms/nve4-nv108: Don't advertise 256x256 cursor support yet (Lyude Paul)
+- platform/x86: intel-vbtn: Stop reporting SW_DOCK events (Hans de Goede)
+- platform/x86: dell-wmi-sysman: Cleanup create_attributes_level_sysfs_files() (Hans de Goede)
+- platform/x86: dell-wmi-sysman: Make sysman_init() return -ENODEV of the interfaces are not found (Hans de Goede)
+- platform/x86: dell-wmi-sysman: Cleanup sysman_init() error-exit handling (Hans de Goede)
+- platform/x86: dell-wmi-sysman: Fix release_attributes_data() getting called twice on init_bios_attributes() failure (Hans de Goede)
+- platform/x86: dell-wmi-sysman: Make it safe to call exit_foo_attributes() multiple times (Hans de Goede)
+- platform/x86: dell-wmi-sysman: Fix possible NULL pointer deref on exit (Hans de Goede)
+- platform/x86: dell-wmi-sysman: Fix crash caused by calling kset_unregister twice (Hans de Goede)
+- platform/x86: thinkpad_acpi: Disable DYTC CQL mode around switching to balanced mode (Hans de Goede)
+- platform/x86: thinkpad_acpi: Allow the FnLock LED to change state (Esteve Varela Colominas)
+- platform/x86: thinkpad_acpi: check dytc version for lapmode sysfs (Mark Pearson)
+- platform/x86: intel-hid: Support Lenovo ThinkPad X1 Tablet Gen 2 (Alban Bedel)
+
+* Sun Mar 21 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.8-10]
+- This is a released kernel branch (Justin M. Forbes)
+
+* Wed Mar 17 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.7-9]
+- Disable weak-modules again rhbz 1828455 (Justin M. Forbes)
+- More config updates for gcc-plugin turn off (Justin M. Forbes)
+- fedora: the PCH_CAN driver is x86-32 only (Peter Robinson)
+- common: disable legacy CAN device support (Peter Robinson)
+- common: Enable Microchip MCP251x/MCP251xFD CAN controllers (Peter Robinson)
+- common: Bosch MCAN support for Intel Elkhart Lake (Peter Robinson)
+- common: enable CAN_PEAK_PCIEFD PCI-E driver (Peter Robinson)
+- common: disable CAN_PEAK_PCIEC PCAN-ExpressCard (Peter Robinson)
+- common: enable common CAN layer 2 protocols (Peter Robinson)
+- ark: disable CAN_LEDS option (Peter Robinson)
+
 * Thu Mar 11 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.6-8]
 - Forgot to turn this back on when disabling gcc plugins (Justin M. Forbes)
 - Fedora: Turn on SND_SOC_INTEL_SKYLAKE_HDAUDIO_CODEC option (Hans de Goede)
