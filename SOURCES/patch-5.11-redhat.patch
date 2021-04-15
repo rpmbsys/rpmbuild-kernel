@@ -1,7 +1,7 @@
- Documentation/ABI/testing/sysfs-platform_profile   |  24 ++
+ Documentation/ABI/testing/sysfs-platform_profile   |  24 +
  Documentation/admin-guide/kdump/kdump.rst          |  11 +
- .../admin-guide/laptops/thinkpad-acpi.rst          |  25 ++
- .../bindings/display/panel/xingbangda,xbd599.yaml  |  50 +++
+ .../admin-guide/laptops/thinkpad-acpi.rst          |  25 +
+ .../bindings/display/panel/xingbangda,xbd599.yaml  |  50 ++
  Documentation/userspace-api/index.rst              |   1 +
  .../userspace-api/sysfs-platform_profile.rst       |  42 ++
  Makefile                                           |   1 +
@@ -9,39 +9,48 @@
  arch/arm/include/asm/uaccess.h                     |   8 +-
  arch/arm64/Kconfig                                 |   3 +-
  .../boot/dts/rockchip/rk3399-pinebook-pro.dts      |   2 +-
+ arch/powerpc/kvm/book3s_hv.c                       |   4 +
  arch/s390/include/asm/ipl.h                        |   1 +
  arch/s390/kernel/ipl.c                             |   5 +
  arch/s390/kernel/setup.c                           |   4 +
  arch/x86/kernel/setup.c                            |  22 +-
+ arch/x86/kvm/hyperv.c                              |   2 +-
  drivers/acpi/Kconfig                               |   3 +
  drivers/acpi/Makefile                              |   1 +
  drivers/acpi/apei/hest.c                           |   8 +
  drivers/acpi/irq.c                                 |  17 +-
  drivers/acpi/pci_mcfg.c                            |   7 +
- drivers/acpi/platform_profile.c                    | 177 ++++++++
+ drivers/acpi/platform_profile.c                    | 177 +++++++
  drivers/acpi/scan.c                                |   9 +
  drivers/ata/libahci.c                              |  18 +
  drivers/char/ipmi/ipmi_dmi.c                       |  15 +
  drivers/char/ipmi/ipmi_msghandler.c                |  16 +-
  drivers/firmware/efi/Makefile                      |   1 +
- drivers/firmware/efi/efi.c                         | 124 ++++--
+ drivers/firmware/efi/efi.c                         | 124 +++--
  drivers/firmware/efi/secureboot.c                  |  38 ++
+ drivers/gpu/drm/i915/display/intel_bw.c            |  80 +---
+ drivers/gpu/drm/i915/display/intel_dp.c            |  11 +-
+ .../gpu/drm/i915/display/intel_dp_link_training.c  |  91 ++--
+ .../gpu/drm/i915/display/intel_dp_link_training.h  |   2 +-
+ drivers/gpu/drm/i915/display/intel_psr.c           |  14 +
+ drivers/gpu/drm/i915/i915_drv.c                    |   5 +-
+ drivers/gpu/drm/i915/i915_drv.h                    |   1 +
+ drivers/gpu/drm/i915/intel_dram.c                  |  82 +++-
  drivers/gpu/drm/panel/Kconfig                      |   9 +
  drivers/gpu/drm/panel/Makefile                     |   1 +
- drivers/gpu/drm/panel/panel-xingbangda-xbd599.c    | 366 ++++++++++++++++
+ drivers/gpu/drm/panel/panel-xingbangda-xbd599.c    | 366 +++++++++++++++
  drivers/gpu/drm/sun4i/sun6i_mipi_dsi.c             |  10 +-
  drivers/hid/hid-rmi.c                              |  64 ---
- drivers/input/rmi4/rmi_driver.c                    | 124 +++---
+ drivers/input/rmi4/rmi_driver.c                    | 124 +++--
  drivers/iommu/iommu.c                              |  22 +
- drivers/mmc/host/sdhci-iproc.c                     |  18 +
  drivers/pci/controller/dwc/Kconfig                 |  10 +-
  drivers/pci/controller/dwc/Makefile                |   2 +-
  drivers/pci/controller/dwc/pcie-tegra194.c         | 102 +++++
  drivers/pci/controller/pcie-brcmstb.c              |   1 +
- drivers/pci/quirks.c                               |  24 ++
+ drivers/pci/quirks.c                               |  24 +
  drivers/platform/x86/Kconfig                       |   2 +
- drivers/platform/x86/ideapad-laptop.c              | 289 +++++++++++++
- drivers/platform/x86/thinkpad_acpi.c               | 464 ++++++++++++++++++++-
+ drivers/platform/x86/ideapad-laptop.c              | 289 ++++++++++++
+ drivers/platform/x86/thinkpad_acpi.c               | 510 ++++++++++++++++++++-
  drivers/scsi/smartpqi/smartpqi_init.c              |  16 +
  drivers/usb/core/hub.c                             |   7 +
  include/linux/efi.h                                |  22 +-
@@ -60,7 +69,16 @@
  security/security.c                                |   6 +
  sound/hda/Kconfig                                  |  14 +
  sound/hda/intel-dsp-config.c                       |  29 +-
- 62 files changed, 2144 insertions(+), 213 deletions(-)
+ sound/soc/sof/intel/apl.c                          |   3 +-
+ sound/soc/sof/intel/cnl.c                          |   3 +-
+ sound/soc/sof/intel/hda-dsp.c                      |   6 +
+ sound/soc/sof/intel/hda.h                          |   1 +
+ sound/soc/sof/intel/icl.c                          |   3 +-
+ sound/soc/sof/intel/tgl.c                          |   1 +
+ sound/soc/sof/ops.h                                |   8 +
+ sound/soc/sof/sof-pci-dev.c                        |   2 +-
+ sound/soc/sof/sof-priv.h                           |   4 +-
+ 80 files changed, 2378 insertions(+), 330 deletions(-)
 
 diff --git a/Documentation/ABI/testing/sysfs-platform_profile b/Documentation/ABI/testing/sysfs-platform_profile
 new file mode 100644
@@ -274,10 +292,10 @@ index 000000000000..c33a71263d9e
 + 2. Add the new profile name, along with a clear description of the
 +    expected behaviour, to the sysfs-platform_profile ABI documentation.
 diff --git a/Makefile b/Makefile
-index 472136a7881e..d390837b5d91 100644
+index 9116941553b8..39427f89a0cd 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -494,6 +494,7 @@ KBUILD_AFLAGS   := -D__ASSEMBLY__ -fno-PIE
+@@ -495,6 +495,7 @@ KBUILD_AFLAGS   := -D__ASSEMBLY__ -fno-PIE
  KBUILD_CFLAGS   := -Wall -Wundef -Werror=strict-prototypes -Wno-trigraphs \
  		   -fno-strict-aliasing -fno-common -fshort-wchar -fno-PIE \
  		   -Werror=implicit-function-declaration -Werror=implicit-int \
@@ -333,10 +351,10 @@ index a13d90206472..6a6aae01755b 100644
 
  #define get_user(x, p)							\
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index e42da99db91f..383d80dd03c7 100644
+index 2517dd8c5a4d..c8dcf2660b24 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -894,7 +894,7 @@ endchoice
+@@ -904,7 +904,7 @@ endchoice
 
  config ARM64_FORCE_52BIT
  	bool "Force 52-bit virtual addresses for userspace"
@@ -345,7 +363,7 @@ index e42da99db91f..383d80dd03c7 100644
  	help
  	  For systems with 52-bit userspace VAs enabled, the kernel will attempt
  	  to maintain compatibility with older software by providing 48-bit VAs
-@@ -1148,6 +1148,7 @@ config XEN
+@@ -1158,6 +1158,7 @@ config XEN
  config FORCE_MAX_ZONEORDER
  	int
  	default "14" if (ARM64_64K_PAGES && TRANSPARENT_HUGEPAGE)
@@ -366,6 +384,28 @@ index 219b7507a10f..45769764425d 100644
  };
 
  &cpu_b0 {
+diff --git a/arch/powerpc/kvm/book3s_hv.c b/arch/powerpc/kvm/book3s_hv.c
+index 6f612d240392..f2ddf7139a2a 100644
+--- a/arch/powerpc/kvm/book3s_hv.c
++++ b/arch/powerpc/kvm/book3s_hv.c
+@@ -3595,6 +3595,7 @@ static int kvmhv_p9_guest_entry(struct kvm_vcpu *vcpu, u64 time_limit,
+ 	unsigned long host_tidr = mfspr(SPRN_TIDR);
+ 	unsigned long host_iamr = mfspr(SPRN_IAMR);
+ 	unsigned long host_amr = mfspr(SPRN_AMR);
++	unsigned long host_fscr = mfspr(SPRN_FSCR);
+ 	s64 dec;
+ 	u64 tb;
+ 	int trap, save_pmu;
+@@ -3735,6 +3736,9 @@ static int kvmhv_p9_guest_entry(struct kvm_vcpu *vcpu, u64 time_limit,
+ 	if (host_amr != vcpu->arch.amr)
+ 		mtspr(SPRN_AMR, host_amr);
+
++	if (host_fscr != vcpu->arch.fscr)
++		mtspr(SPRN_FSCR, host_fscr);
++
+ 	msr_check_and_set(MSR_FP | MSR_VEC | MSR_VSX);
+ 	store_fp_state(&vcpu->arch.fp);
+ #ifdef CONFIG_ALTIVEC
 diff --git a/arch/s390/include/asm/ipl.h b/arch/s390/include/asm/ipl.h
 index a9e2c7295b35..6ff11f3a2d47 100644
 --- a/arch/s390/include/asm/ipl.h
@@ -414,7 +454,7 @@ index 1fbed91c73bc..73f5724342b1 100644
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
 diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index 740f3bdb3f61..db04c427e35c 100644
+index df964571a6b4..200db376f728 100644
 --- a/arch/x86/kernel/setup.c
 +++ b/arch/x86/kernel/setup.c
 @@ -19,6 +19,7 @@
@@ -439,7 +479,7 @@ index 740f3bdb3f61..db04c427e35c 100644
  	dmi_setup();
 
  	/*
-@@ -1113,19 +1121,7 @@ void __init setup_arch(char **cmdline_p)
+@@ -1116,19 +1124,7 @@ void __init setup_arch(char **cmdline_p)
  	/* Allocate bigger log buffer */
  	setup_log_buf(1);
 
@@ -460,6 +500,19 @@ index 740f3bdb3f61..db04c427e35c 100644
 
  	reserve_initrd();
 
+diff --git a/arch/x86/kvm/hyperv.c b/arch/x86/kvm/hyperv.c
+index 922c69dcca4d..cee2cb0f6e5f 100644
+--- a/arch/x86/kvm/hyperv.c
++++ b/arch/x86/kvm/hyperv.c
+@@ -155,7 +155,7 @@ static struct kvm_vcpu_hv_synic *synic_get(struct kvm *kvm, u32 vpidx)
+ 	struct kvm_vcpu_hv_synic *synic;
+
+ 	vcpu = get_vcpu_by_vpidx(kvm, vpidx);
+-	if (!vcpu)
++	if (!vcpu || !vcpu_to_hv_vcpu(vcpu))
+ 		return NULL;
+ 	synic = vcpu_to_synic(vcpu);
+ 	return (synic->active) ? synic : NULL;
 diff --git a/drivers/acpi/Kconfig b/drivers/acpi/Kconfig
 index ebcf534514be..7265173689ce 100644
 --- a/drivers/acpi/Kconfig
@@ -750,10 +803,10 @@ index 000000000000..4a59c5993bde
 +MODULE_AUTHOR("Mark Pearson <markpearson@lenovo.com>");
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index 22566b4b3150..4c2294593928 100644
+index 239eeeafc62f..bb8c046fc4cb 100644
 --- a/drivers/acpi/scan.c
 +++ b/drivers/acpi/scan.c
-@@ -1620,6 +1620,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
+@@ -1638,6 +1638,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
  	if (!acpi_match_device_ids(device, i2c_multi_instantiate_ids))
  		return false;
 
@@ -872,7 +925,7 @@ index 467e94259679..9b6f5b8e5397 100644
  obj-$(CONFIG_EFI_RCI2_TABLE)		+= rci2-table.o
  obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
 diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index df3f9bcab581..8d5b6eb36467 100644
+index 4b7ee3fa9224..64b31d852d20 100644
 --- a/drivers/firmware/efi/efi.c
 +++ b/drivers/firmware/efi/efi.c
 @@ -31,6 +31,7 @@
@@ -1060,6 +1113,507 @@ index 000000000000..de0a3714a5d4
 +		}
 +	}
 +}
+diff --git a/drivers/gpu/drm/i915/display/intel_bw.c b/drivers/gpu/drm/i915/display/intel_bw.c
+index bd060404d249..4b5a30ac84bc 100644
+--- a/drivers/gpu/drm/i915/display/intel_bw.c
++++ b/drivers/gpu/drm/i915/display/intel_bw.c
+@@ -20,76 +20,9 @@ struct intel_qgv_point {
+ struct intel_qgv_info {
+ 	struct intel_qgv_point points[I915_NUM_QGV_POINTS];
+ 	u8 num_points;
+-	u8 num_channels;
+ 	u8 t_bl;
+-	enum intel_dram_type dram_type;
+ };
+
+-static int icl_pcode_read_mem_global_info(struct drm_i915_private *dev_priv,
+-					  struct intel_qgv_info *qi)
+-{
+-	u32 val = 0;
+-	int ret;
+-
+-	ret = sandybridge_pcode_read(dev_priv,
+-				     ICL_PCODE_MEM_SUBSYSYSTEM_INFO |
+-				     ICL_PCODE_MEM_SS_READ_GLOBAL_INFO,
+-				     &val, NULL);
+-	if (ret)
+-		return ret;
+-
+-	if (IS_GEN(dev_priv, 12)) {
+-		switch (val & 0xf) {
+-		case 0:
+-			qi->dram_type = INTEL_DRAM_DDR4;
+-			break;
+-		case 3:
+-			qi->dram_type = INTEL_DRAM_LPDDR4;
+-			break;
+-		case 4:
+-			qi->dram_type = INTEL_DRAM_DDR3;
+-			break;
+-		case 5:
+-			qi->dram_type = INTEL_DRAM_LPDDR3;
+-			break;
+-		default:
+-			MISSING_CASE(val & 0xf);
+-			break;
+-		}
+-	} else if (IS_GEN(dev_priv, 11)) {
+-		switch (val & 0xf) {
+-		case 0:
+-			qi->dram_type = INTEL_DRAM_DDR4;
+-			break;
+-		case 1:
+-			qi->dram_type = INTEL_DRAM_DDR3;
+-			break;
+-		case 2:
+-			qi->dram_type = INTEL_DRAM_LPDDR3;
+-			break;
+-		case 3:
+-			qi->dram_type = INTEL_DRAM_LPDDR4;
+-			break;
+-		default:
+-			MISSING_CASE(val & 0xf);
+-			break;
+-		}
+-	} else {
+-		MISSING_CASE(INTEL_GEN(dev_priv));
+-		qi->dram_type = INTEL_DRAM_LPDDR3; /* Conservative default */
+-	}
+-
+-	qi->num_channels = (val & 0xf0) >> 4;
+-	qi->num_points = (val & 0xf00) >> 8;
+-
+-	if (IS_GEN(dev_priv, 12))
+-		qi->t_bl = qi->dram_type == INTEL_DRAM_DDR4 ? 4 : 16;
+-	else if (IS_GEN(dev_priv, 11))
+-		qi->t_bl = qi->dram_type == INTEL_DRAM_DDR4 ? 4 : 8;
+-
+-	return 0;
+-}
+-
+ static int icl_pcode_read_qgv_point_info(struct drm_i915_private *dev_priv,
+ 					 struct intel_qgv_point *sp,
+ 					 int point)
+@@ -139,11 +72,15 @@ int icl_pcode_restrict_qgv_points(struct drm_i915_private *dev_priv,
+ static int icl_get_qgv_points(struct drm_i915_private *dev_priv,
+ 			      struct intel_qgv_info *qi)
+ {
++	const struct dram_info *dram_info = &dev_priv->dram_info;
+ 	int i, ret;
+
+-	ret = icl_pcode_read_mem_global_info(dev_priv, qi);
+-	if (ret)
+-		return ret;
++	qi->num_points = dram_info->num_qgv_points;
++
++	if (IS_GEN(dev_priv, 12))
++		qi->t_bl = dev_priv->dram_info.type == INTEL_DRAM_DDR4 ? 4 : 16;
++	else if (IS_GEN(dev_priv, 11))
++		qi->t_bl = dev_priv->dram_info.type == INTEL_DRAM_DDR4 ? 4 : 8;
+
+ 	if (drm_WARN_ON(&dev_priv->drm,
+ 			qi->num_points > ARRAY_SIZE(qi->points)))
+@@ -209,7 +146,7 @@ static int icl_get_bw_info(struct drm_i915_private *dev_priv, const struct intel
+ {
+ 	struct intel_qgv_info qi = {};
+ 	bool is_y_tile = true; /* assume y tile may be used */
+-	int num_channels;
++	int num_channels = dev_priv->dram_info.num_channels;
+ 	int deinterleave;
+ 	int ipqdepth, ipqdepthpch;
+ 	int dclk_max;
+@@ -222,7 +159,6 @@ static int icl_get_bw_info(struct drm_i915_private *dev_priv, const struct intel
+ 			    "Failed to get memory subsystem information, ignoring bandwidth limits");
+ 		return ret;
+ 	}
+-	num_channels = qi.num_channels;
+
+ 	deinterleave = DIV_ROUND_UP(num_channels, is_y_tile ? 4 : 2);
+ 	dclk_max = icl_sagv_max_dclk(&qi);
+diff --git a/drivers/gpu/drm/i915/display/intel_dp.c b/drivers/gpu/drm/i915/display/intel_dp.c
+index 8a26307c4896..bc2aae63fe40 100644
+--- a/drivers/gpu/drm/i915/display/intel_dp.c
++++ b/drivers/gpu/drm/i915/display/intel_dp.c
+@@ -1400,6 +1400,7 @@ static u32 g4x_get_aux_send_ctl(struct intel_dp *intel_dp,
+ 	else
+ 		precharge = 5;
+
++	/* Max timeout value on G4x-BDW: 1.6ms */
+ 	if (IS_BROADWELL(dev_priv))
+ 		timeout = DP_AUX_CH_CTL_TIME_OUT_600us;
+ 	else
+@@ -1426,6 +1427,12 @@ static u32 skl_get_aux_send_ctl(struct intel_dp *intel_dp,
+ 	enum phy phy = intel_port_to_phy(i915, dig_port->base.port);
+ 	u32 ret;
+
++	/*
++	 * Max timeout values:
++	 * SKL-GLK: 1.6ms
++	 * CNL: 3.2ms
++	 * ICL+: 4ms
++	 */
+ 	ret = DP_AUX_CH_CTL_SEND_BUSY |
+ 	      DP_AUX_CH_CTL_DONE |
+ 	      DP_AUX_CH_CTL_INTERRUPT |
+@@ -4871,9 +4878,7 @@ intel_dp_get_dpcd(struct intel_dp *intel_dp)
+ {
+ 	int ret;
+
+-	intel_dp_lttpr_init(intel_dp);
+-
+-	if (drm_dp_read_dpcd_caps(&intel_dp->aux, intel_dp->dpcd))
++	if (intel_dp_init_lttpr_and_dprx_caps(intel_dp) < 0)
+ 		return false;
+
+ 	/*
+diff --git a/drivers/gpu/drm/i915/display/intel_dp_link_training.c b/drivers/gpu/drm/i915/display/intel_dp_link_training.c
+index d8c6d7054d11..e6532ea5757b 100644
+--- a/drivers/gpu/drm/i915/display/intel_dp_link_training.c
++++ b/drivers/gpu/drm/i915/display/intel_dp_link_training.c
+@@ -34,16 +34,9 @@ intel_dp_dump_link_status(const u8 link_status[DP_LINK_STATUS_SIZE])
+ 		      link_status[3], link_status[4], link_status[5]);
+ }
+
+-static int intel_dp_lttpr_count(struct intel_dp *intel_dp)
++static void intel_dp_reset_lttpr_common_caps(struct intel_dp *intel_dp)
+ {
+-	int count = drm_dp_lttpr_count(intel_dp->lttpr_common_caps);
+-
+-	/*
+-	 * Pretend no LTTPRs in case of LTTPR detection error, or
+-	 * if too many (>8) LTTPRs are detected. This translates to link
+-	 * training in transparent mode.
+-	 */
+-	return count <= 0 ? 0 : count;
++	memset(&intel_dp->lttpr_common_caps, 0, sizeof(intel_dp->lttpr_common_caps));
+ }
+
+ static void intel_dp_reset_lttpr_count(struct intel_dp *intel_dp)
+@@ -93,10 +86,21 @@ static void intel_dp_read_lttpr_phy_caps(struct intel_dp *intel_dp,
+
+ static bool intel_dp_read_lttpr_common_caps(struct intel_dp *intel_dp)
+ {
++	struct drm_i915_private *i915 = dp_to_i915(intel_dp);
++
++	if (intel_dp_is_edp(intel_dp))
++		return false;
++
++	/*
++	 * Detecting LTTPRs must be avoided on platforms with an AUX timeout
++	 * period < 3.2ms. (see DP Standard v2.0, 2.11.2, 3.6.6.1).
++	 */
++	if (INTEL_GEN(i915) < 10)
++		return false;
++
+ 	if (drm_dp_read_lttpr_common_caps(&intel_dp->aux,
+ 					  intel_dp->lttpr_common_caps) < 0) {
+-		memset(intel_dp->lttpr_common_caps, 0,
+-		       sizeof(intel_dp->lttpr_common_caps));
++		intel_dp_reset_lttpr_common_caps(intel_dp);
+ 		return false;
+ 	}
+
+@@ -118,30 +122,57 @@ intel_dp_set_lttpr_transparent_mode(struct intel_dp *intel_dp, bool enable)
+ }
+
+ /**
+- * intel_dp_lttpr_init - detect LTTPRs and init the LTTPR link training mode
++ * intel_dp_init_lttpr_and_dprx_caps - detect LTTPR and DPRX caps, init the LTTPR link training mode
+  * @intel_dp: Intel DP struct
+  *
+- * Read the LTTPR common capabilities, switch to non-transparent link training
+- * mode if any is detected and read the PHY capabilities for all detected
+- * LTTPRs. In case of an LTTPR detection error or if the number of
++ * Read the LTTPR common and DPRX capabilities and switch to non-transparent
++ * link training mode if any is detected and read the PHY capabilities for all
++ * detected LTTPRs. In case of an LTTPR detection error or if the number of
+  * LTTPRs is more than is supported (8), fall back to the no-LTTPR,
+  * transparent mode link training mode.
+  *
+  * Returns:
+- *   >0  if LTTPRs were detected and the non-transparent LT mode was set
++ *   >0  if LTTPRs were detected and the non-transparent LT mode was set. The
++ *       DPRX capabilities are read out.
+  *    0  if no LTTPRs or more than 8 LTTPRs were detected or in case of a
+- *       detection failure and the transparent LT mode was set
++ *       detection failure and the transparent LT mode was set. The DPRX
++ *       capabilities are read out.
++ *   <0  Reading out the DPRX capabilities failed.
+  */
+-int intel_dp_lttpr_init(struct intel_dp *intel_dp)
++int intel_dp_init_lttpr_and_dprx_caps(struct intel_dp *intel_dp)
+ {
+ 	int lttpr_count;
+ 	bool ret;
+ 	int i;
+
+-	if (intel_dp_is_edp(intel_dp))
++	ret = intel_dp_read_lttpr_common_caps(intel_dp);
++
++	/* The DPTX shall read the DPRX caps after LTTPR detection. */
++	if (drm_dp_read_dpcd_caps(&intel_dp->aux, intel_dp->dpcd)) {
++		intel_dp_reset_lttpr_common_caps(intel_dp);
++		return -EIO;
++	}
++
++	if (!ret)
+ 		return 0;
+
+-	ret = intel_dp_read_lttpr_common_caps(intel_dp);
++	/*
++	 * The 0xF0000-0xF02FF range is only valid if the DPCD revision is
++	 * at least 1.4.
++	 */
++	if (intel_dp->dpcd[DP_DPCD_REV] < 0x14) {
++		intel_dp_reset_lttpr_common_caps(intel_dp);
++		return 0;
++	}
++
++	lttpr_count = drm_dp_lttpr_count(intel_dp->lttpr_common_caps);
++	/*
++	 * Prevent setting LTTPR transparent mode explicitly if no LTTPRs are
++	 * detected as this breaks link training at least on the Dell WD19TB
++	 * dock.
++	 */
++	if (lttpr_count == 0)
++		return 0;
+
+ 	/*
+ 	 * See DP Standard v2.0 3.6.6.1. about the explicit disabling of
+@@ -150,17 +181,12 @@ int intel_dp_lttpr_init(struct intel_dp *intel_dp)
+ 	 */
+ 	intel_dp_set_lttpr_transparent_mode(intel_dp, true);
+
+-	if (!ret)
+-		return 0;
+-
+-	lttpr_count = intel_dp_lttpr_count(intel_dp);
+-
+ 	/*
+ 	 * In case of unsupported number of LTTPRs or failing to switch to
+ 	 * non-transparent mode fall-back to transparent link training mode,
+ 	 * still taking into account any LTTPR common lane- rate/count limits.
+ 	 */
+-	if (lttpr_count == 0)
++	if (lttpr_count < 0)
+ 		return 0;
+
+ 	if (!intel_dp_set_lttpr_transparent_mode(intel_dp, false)) {
+@@ -178,7 +204,7 @@ int intel_dp_lttpr_init(struct intel_dp *intel_dp)
+
+ 	return lttpr_count;
+ }
+-EXPORT_SYMBOL(intel_dp_lttpr_init);
++EXPORT_SYMBOL(intel_dp_init_lttpr_and_dprx_caps);
+
+ static u8 dp_voltage_max(u8 preemph)
+ {
+@@ -222,11 +248,11 @@ intel_dp_phy_is_downstream_of_source(struct intel_dp *intel_dp,
+ 				     enum drm_dp_phy dp_phy)
+ {
+ 	struct drm_i915_private *i915 = dp_to_i915(intel_dp);
+-	int lttpr_count = intel_dp_lttpr_count(intel_dp);
++	int lttpr_count = drm_dp_lttpr_count(intel_dp->lttpr_common_caps);
+
+-	drm_WARN_ON_ONCE(&i915->drm, lttpr_count == 0 && dp_phy != DP_PHY_DPRX);
++	drm_WARN_ON_ONCE(&i915->drm, lttpr_count <= 0 && dp_phy != DP_PHY_DPRX);
+
+-	return lttpr_count == 0 || dp_phy == DP_PHY_LTTPR(lttpr_count - 1);
++	return lttpr_count <= 0 || dp_phy == DP_PHY_LTTPR(lttpr_count - 1);
+ }
+
+ static u8 intel_dp_phy_voltage_max(struct intel_dp *intel_dp,
+@@ -814,7 +840,10 @@ void intel_dp_start_link_train(struct intel_dp *intel_dp,
+ 	 * TODO: Reiniting LTTPRs here won't be needed once proper connector
+ 	 * HW state readout is added.
+ 	 */
+-	int lttpr_count = intel_dp_lttpr_init(intel_dp);
++	int lttpr_count = intel_dp_init_lttpr_and_dprx_caps(intel_dp);
++
++	if (lttpr_count < 0)
++		return;
+
+ 	if (!intel_dp_link_train_all_phys(intel_dp, crtc_state, lttpr_count))
+ 		intel_dp_schedule_fallback_link_training(intel_dp, crtc_state);
+diff --git a/drivers/gpu/drm/i915/display/intel_dp_link_training.h b/drivers/gpu/drm/i915/display/intel_dp_link_training.h
+index 6a1f76bd8c75..9cb7c28027f0 100644
+--- a/drivers/gpu/drm/i915/display/intel_dp_link_training.h
++++ b/drivers/gpu/drm/i915/display/intel_dp_link_training.h
+@@ -11,7 +11,7 @@
+ struct intel_crtc_state;
+ struct intel_dp;
+
+-int intel_dp_lttpr_init(struct intel_dp *intel_dp);
++int intel_dp_init_lttpr_and_dprx_caps(struct intel_dp *intel_dp);
+
+ void intel_dp_get_adjust_train(struct intel_dp *intel_dp,
+ 			       const struct intel_crtc_state *crtc_state,
+diff --git a/drivers/gpu/drm/i915/display/intel_psr.c b/drivers/gpu/drm/i915/display/intel_psr.c
+index b3631b722de3..5089dbd240f4 100644
+--- a/drivers/gpu/drm/i915/display/intel_psr.c
++++ b/drivers/gpu/drm/i915/display/intel_psr.c
+@@ -653,6 +653,20 @@ tgl_dc3co_exitline_compute_config(struct intel_dp *intel_dp,
+ 	struct drm_i915_private *dev_priv = dp_to_i915(intel_dp);
+ 	u32 exit_scanlines;
+
++	/*
++	 * FIXME: Due to the changed sequence of activating/deactivating DC3CO,
++	 * disable DC3CO until the changed dc3co activating/deactivating sequence
++	 * is applied. B.Specs:49196
++	 */
++	return;
++
++	/*
++	 * DMC's DC3CO exit mechanism has an issue with Selective Fecth
++	 * TODO: when the issue is addressed, this restriction should be removed.
++	 */
++	if (crtc_state->enable_psr2_sel_fetch)
++		return;
++
+ 	if (!(dev_priv->csr.allowed_dc_mask & DC_STATE_EN_DC3CO))
+ 		return;
+
+diff --git a/drivers/gpu/drm/i915/i915_drv.c b/drivers/gpu/drm/i915/i915_drv.c
+index 99eb0d7bbc44..85feb5742296 100644
+--- a/drivers/gpu/drm/i915/i915_drv.c
++++ b/drivers/gpu/drm/i915/i915_drv.c
+@@ -609,14 +609,15 @@ static int i915_driver_hw_probe(struct drm_i915_private *dev_priv)
+ 		goto err_msi;
+
+ 	intel_opregion_setup(dev_priv);
++
++	intel_pcode_init(dev_priv);
++
+ 	/*
+ 	 * Fill the dram structure to get the system raw bandwidth and
+ 	 * dram info. This will be used for memory latency calculation.
+ 	 */
+ 	intel_dram_detect(dev_priv);
+
+-	intel_pcode_init(dev_priv);
+-
+ 	intel_bw_init_hw(dev_priv);
+
+ 	return 0;
+diff --git a/drivers/gpu/drm/i915/i915_drv.h b/drivers/gpu/drm/i915/i915_drv.h
+index bd5f76a28d68..a0464f73710a 100644
+--- a/drivers/gpu/drm/i915/i915_drv.h
++++ b/drivers/gpu/drm/i915/i915_drv.h
+@@ -1147,6 +1147,7 @@ struct drm_i915_private {
+ 			INTEL_DRAM_LPDDR3,
+ 			INTEL_DRAM_LPDDR4
+ 		} type;
++		u8 num_qgv_points;
+ 	} dram_info;
+
+ 	struct intel_bw_info {
+diff --git a/drivers/gpu/drm/i915/intel_dram.c b/drivers/gpu/drm/i915/intel_dram.c
+index 4754296a250e..a68be91a1140 100644
+--- a/drivers/gpu/drm/i915/intel_dram.c
++++ b/drivers/gpu/drm/i915/intel_dram.c
+@@ -5,6 +5,7 @@
+
+ #include "i915_drv.h"
+ #include "intel_dram.h"
++#include "intel_sideband.h"
+
+ struct dram_dimm_info {
+ 	u16 size;
+@@ -434,6 +435,81 @@ static int bxt_get_dram_info(struct drm_i915_private *i915)
+ 	return 0;
+ }
+
++static int icl_pcode_read_mem_global_info(struct drm_i915_private *dev_priv)
++{
++	struct dram_info *dram_info = &dev_priv->dram_info;
++	u32 val = 0;
++	int ret;
++
++	ret = sandybridge_pcode_read(dev_priv,
++				     ICL_PCODE_MEM_SUBSYSYSTEM_INFO |
++				     ICL_PCODE_MEM_SS_READ_GLOBAL_INFO,
++				     &val, NULL);
++	if (ret)
++		return ret;
++
++	if (IS_GEN(dev_priv, 12)) {
++		switch (val & 0xf) {
++		case 0:
++			dram_info->type = INTEL_DRAM_DDR4;
++			break;
++		case 3:
++			dram_info->type = INTEL_DRAM_LPDDR4;
++			break;
++		case 4:
++			dram_info->type = INTEL_DRAM_DDR3;
++			break;
++		case 5:
++			dram_info->type = INTEL_DRAM_LPDDR3;
++			break;
++		default:
++			MISSING_CASE(val & 0xf);
++			return -1;
++		}
++	} else {
++		switch (val & 0xf) {
++		case 0:
++			dram_info->type = INTEL_DRAM_DDR4;
++			break;
++		case 1:
++			dram_info->type = INTEL_DRAM_DDR3;
++			break;
++		case 2:
++			dram_info->type = INTEL_DRAM_LPDDR3;
++			break;
++		case 3:
++			dram_info->type = INTEL_DRAM_LPDDR4;
++			break;
++		default:
++			MISSING_CASE(val & 0xf);
++			return -1;
++		}
++	}
++
++	dram_info->num_channels = (val & 0xf0) >> 4;
++	dram_info->num_qgv_points = (val & 0xf00) >> 8;
++
++	return 0;
++}
++
++static int gen11_get_dram_info(struct drm_i915_private *i915)
++{
++	int ret = skl_get_dram_info(i915);
++
++	if (ret)
++		return ret;
++
++	return icl_pcode_read_mem_global_info(i915);
++}
++
++static int gen12_get_dram_info(struct drm_i915_private *i915)
++{
++	/* Always needed for GEN12+ */
++	i915->dram_info.is_16gb_dimm = true;
++
++	return icl_pcode_read_mem_global_info(i915);
++}
++
+ void intel_dram_detect(struct drm_i915_private *i915)
+ {
+ 	struct dram_info *dram_info = &i915->dram_info;
+@@ -449,7 +525,11 @@ void intel_dram_detect(struct drm_i915_private *i915)
+ 	if (INTEL_GEN(i915) < 9 || !HAS_DISPLAY(i915))
+ 		return;
+
+-	if (IS_GEN9_LP(i915))
++	if (INTEL_GEN(i915) >= 12)
++		ret = gen12_get_dram_info(i915);
++	else if (INTEL_GEN(i915) >= 11)
++		ret = gen11_get_dram_info(i915);
++	else if (IS_GEN9_LP(i915))
+ 		ret = bxt_get_dram_info(i915);
+ 	else
+ 		ret = skl_get_dram_info(i915);
 diff --git a/drivers/gpu/drm/panel/Kconfig b/drivers/gpu/drm/panel/Kconfig
 index b4e021ea30f9..5687b745ebe2 100644
 --- a/drivers/gpu/drm/panel/Kconfig
@@ -1836,38 +2390,6 @@ index fd5f59373fc6..8a11aa9e0318 100644
  /*
   * Changes the default domain of an iommu group that has *only* one device
   *
-diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-index c9434b461aab..ddeaf8e1f72f 100644
---- a/drivers/mmc/host/sdhci-iproc.c
-+++ b/drivers/mmc/host/sdhci-iproc.c
-@@ -296,9 +296,27 @@ static const struct of_device_id sdhci_iproc_of_match[] = {
- MODULE_DEVICE_TABLE(of, sdhci_iproc_of_match);
-
- #ifdef CONFIG_ACPI
-+/*
-+ * This is a duplicate of bcm2835_(pltfrm_)data without caps quirks
-+ * which are provided by the ACPI table.
-+ */
-+static const struct sdhci_pltfm_data sdhci_bcm_arasan_data = {
-+	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
-+		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-+		  SDHCI_QUIRK_NO_HISPD_BIT,
-+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-+	.ops = &sdhci_iproc_32only_ops,
-+};
-+
-+static const struct sdhci_iproc_data bcm_arasan_data = {
-+	.pdata = &sdhci_bcm_arasan_data,
-+};
-+
- static const struct acpi_device_id sdhci_iproc_acpi_ids[] = {
- 	{ .id = "BRCM5871", .driver_data = (kernel_ulong_t)&iproc_cygnus_data },
- 	{ .id = "BRCM5872", .driver_data = (kernel_ulong_t)&iproc_data },
-+	{ .id = "BCM2847",  .driver_data = (kernel_ulong_t)&bcm_arasan_data },
-+	{ .id = "BRCME88C", .driver_data = (kernel_ulong_t)&bcm2711_data },
- 	{ /* sentinel */ }
- };
- MODULE_DEVICE_TABLE(acpi, sdhci_iproc_acpi_ids);
 diff --git a/drivers/pci/controller/dwc/Kconfig b/drivers/pci/controller/dwc/Kconfig
 index 22c5529e9a65..259ff5ff3f24 100644
 --- a/drivers/pci/controller/dwc/Kconfig
@@ -2463,7 +2985,7 @@ index 5b81bafa5c16..cc42af2a0a98 100644
  }
  #endif
 diff --git a/drivers/platform/x86/thinkpad_acpi.c b/drivers/platform/x86/thinkpad_acpi.c
-index f3e8eca8d86d..5b596a825b24 100644
+index 9f8da7155a89..9ecf7829b3d8 100644
 --- a/drivers/platform/x86/thinkpad_acpi.c
 +++ b/drivers/platform/x86/thinkpad_acpi.c
 @@ -66,6 +66,7 @@
@@ -2474,9 +2996,23 @@ index f3e8eca8d86d..5b596a825b24 100644
  #include <sound/core.h>
  #include <sound/control.h>
  #include <sound/initval.h>
-@@ -9855,16 +9856,27 @@ static bool has_lapsensor;
+@@ -9850,6 +9851,11 @@ static struct ibm_struct lcdshadow_driver_data = {
+  * Thinkpad sensor interfaces
+  */
+
++#define DYTC_CMD_QUERY        0 /* To get DYTC status - enable/revision */
++#define DYTC_QUERY_ENABLE_BIT 8  /* Bit        8 - 0 = disabled, 1 = enabled */
++#define DYTC_QUERY_SUBREV_BIT 16 /* Bits 16 - 27 - sub revision */
++#define DYTC_QUERY_REV_BIT    28 /* Bits 28 - 31 - revision */
++
+ #define DYTC_CMD_GET          2 /* To get current IC function and mode */
+ #define DYTC_GET_LAPMODE_BIT 17 /* Set when in lapmode */
+
+@@ -9860,17 +9866,56 @@ static bool has_palmsensor;
+ static bool has_lapsensor;
  static bool palm_state;
  static bool lap_state;
++static int dytc_version;
 
 -static int lapsensor_get(bool *present, bool *state)
 +static int dytc_command(int command, int *output)
@@ -2496,6 +3032,33 @@ index f3e8eca8d86d..5b596a825b24 100644
 +	return 0;
 +}
 +
++static int dytc_get_version(void)
++{
++	int err, output;
++
++	/* Check if we've been called before - and just return cached value */
++	if (dytc_version)
++		return dytc_version;
++
++	/* Otherwise query DYTC and extract version information */
++	err = dytc_command(DYTC_CMD_QUERY, &output);
++	/*
++	 * If support isn't available (ENODEV) then don't return an error
++	 * and don't create the sysfs group
++	 */
++	if (err == -ENODEV)
++		return 0;
++	/* For all other errors we can flag the failure */
++	if (err)
++		return err;
++
++	/* Check DYTC is enabled and supports mode setting */
++	if (output & BIT(DYTC_QUERY_ENABLE_BIT))
++		dytc_version = (output >> DYTC_QUERY_REV_BIT) & 0xF;
++
++	return 0;
++}
++
 +static int lapsensor_get(bool *present, bool *state)
 +{
 +	int output, err;
@@ -2507,7 +3070,27 @@ index f3e8eca8d86d..5b596a825b24 100644
 
  	*present = true; /*If we get his far, we have lapmode support*/
  	*state = output & BIT(DYTC_GET_LAPMODE_BIT) ? true : false;
-@@ -9983,6 +9995,434 @@ static struct ibm_struct proxsensor_driver_data = {
+@@ -9968,7 +10013,18 @@ static int tpacpi_proxsensor_init(struct ibm_init_struct *iibm)
+ 		if (err)
+ 			return err;
+ 	}
+-	if (has_lapsensor) {
++
++	/* Check if we know the DYTC version, if we don't then get it */
++	if (!dytc_version) {
++		err = dytc_get_version();
++		if (err)
++			return err;
++	}
++	/*
++	 * Platforms before DYTC version 5 claim to have a lap sensor, but it doesn't work, so we
++	 * ignore them
++	 */
++	if (has_lapsensor && (dytc_version >= 5)) {
+ 		err = sysfs_create_file(&tpacpi_pdev->dev.kobj, &dev_attr_dytc_lapmode.attr);
+ 		if (err)
+ 			return err;
+@@ -9989,6 +10045,434 @@ static struct ibm_struct proxsensor_driver_data = {
  	.exit = proxsensor_exit,
  };
 
@@ -2515,13 +3098,8 @@ index f3e8eca8d86d..5b596a825b24 100644
 + * DYTC Platform Profile interface
 + */
 +
-+#define DYTC_CMD_QUERY        0 /* To get DYTC status - enable/revision */
 +#define DYTC_CMD_SET          1 /* To enable/disable IC function mode */
 +#define DYTC_CMD_RESET    0x1ff /* To reset back to default */
-+
-+#define DYTC_QUERY_ENABLE_BIT 8  /* Bit        8 - 0 = disabled, 1 = enabled */
-+#define DYTC_QUERY_SUBREV_BIT 16 /* Bits 16 - 27 - sub revision */
-+#define DYTC_QUERY_REV_BIT    28 /* Bits 28 - 31 - revision */
 +
 +#define DYTC_GET_FUNCTION_BIT 8  /* Bits  8-11 - function setting */
 +#define DYTC_GET_MODE_BIT     12 /* Bits 12-15 - mode setting */
@@ -2658,8 +3236,13 @@ index f3e8eca8d86d..5b596a825b24 100644
 +		return err;
 +
 +	if (profile == PLATFORM_PROFILE_BALANCED) {
-+		/* To get back to balanced mode we just issue a reset command */
-+		err = dytc_command(DYTC_CMD_RESET, &output);
++		/*
++		 * To get back to balanced mode we need to issue a reset command.
++		 * Note we still need to disable CQL mode before hand and re-enable
++		 * it afterwards, otherwise dytc_lapmode gets reset to 0 and stays
++		 * stuck at 0 for aprox. 30 minutes.
++		 */
++		err = dytc_cql_command(DYTC_CMD_RESET, &output);
 +		if (err)
 +			goto unlock;
 +	} else {
@@ -2727,28 +3310,28 @@ index f3e8eca8d86d..5b596a825b24 100644
 +	if (err)
 +		return err;
 +
++	/* Check if we know the DYTC version, if we don't then get it */
++	if (!dytc_version) {
++		err = dytc_get_version();
++		if (err)
++			return err;
++	}
 +	/* Check DYTC is enabled and supports mode setting */
-+	if (output & BIT(DYTC_QUERY_ENABLE_BIT)) {
-+		/* Only DYTC v5.0 and later has this feature. */
-+		int dytc_version;
++	if (dytc_version >= 5) {
++		dbg_printk(TPACPI_DBG_INIT,
++				"DYTC version %d: thermal mode available\n", dytc_version);
++		/* Create platform_profile structure and register */
++		err = platform_profile_register(&dytc_profile);
++		/*
++		 * If for some reason platform_profiles aren't enabled
++		 * don't quit terminally.
++		 */
++		if (err)
++			return 0;
 +
-+		dytc_version = (output >> DYTC_QUERY_REV_BIT) & 0xF;
-+		if (dytc_version >= 5) {
-+			dbg_printk(TPACPI_DBG_INIT,
-+				   "DYTC version %d: thermal mode available\n", dytc_version);
-+			/* Create platform_profile structure and register */
-+			err = platform_profile_register(&dytc_profile);
-+			/*
-+			 * If for some reason platform_profiles aren't enabled
-+			 * don't quit terminally.
-+			 */
-+			if (err)
-+				return 0;
-+
-+			dytc_profile_available = true;
-+			/* Ensure initial values are correct */
-+			dytc_profile_refresh();
-+		}
++		dytc_profile_available = true;
++		/* Ensure initial values are correct */
++		dytc_profile_refresh();
 +	}
 +	return 0;
 +}
@@ -2942,7 +3525,7 @@ index f3e8eca8d86d..5b596a825b24 100644
  /****************************************************************************
   ****************************************************************************
   *
-@@ -10031,8 +10471,12 @@ static void tpacpi_driver_event(const unsigned int hkey_event)
+@@ -10037,8 +10521,12 @@ static void tpacpi_driver_event(const unsigned int hkey_event)
  		mutex_unlock(&kbdlight_mutex);
  	}
 
@@ -2956,7 +3539,7 @@ index f3e8eca8d86d..5b596a825b24 100644
  }
 
  static void hotkey_driver_event(const unsigned int scancode)
-@@ -10475,6 +10919,14 @@ static struct ibm_init_struct ibms_init[] __initdata = {
+@@ -10481,6 +10969,14 @@ static struct ibm_init_struct ibms_init[] __initdata = {
  		.init = tpacpi_proxsensor_init,
  		.data = &proxsensor_driver_data,
  	},
@@ -3024,7 +3607,7 @@ index 7f71218cc1e5..283fc0f41cd2 100644
  	 * disconnected while waiting for the lock to succeed. */
  	usb_lock_device(hdev);
 diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 763b816ba19c..4c55e3aa7e95 100644
+index 119262585e9b..7d67f0187c34 100644
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
 @@ -43,6 +43,8 @@
@@ -3036,7 +3619,7 @@ index 763b816ba19c..4c55e3aa7e95 100644
  typedef unsigned long efi_status_t;
  typedef u8 efi_bool_t;
  typedef u16 efi_char16_t;		/* UNICODE character */
-@@ -786,6 +788,14 @@ extern int __init efi_setup_pcdp_console(char *);
+@@ -788,6 +790,14 @@ extern int __init efi_setup_pcdp_console(char *);
  #define EFI_MEM_ATTR		10	/* Did firmware publish an EFI_MEMORY_ATTRIBUTES table? */
  #define EFI_MEM_NO_SOFT_RESERVE	11	/* Is the kernel configured to ignore soft reservations? */
  #define EFI_PRESERVE_BS_REGIONS	12	/* Are EFI boot-services memory segments available? */
@@ -3051,7 +3634,7 @@ index 763b816ba19c..4c55e3aa7e95 100644
 
  #ifdef CONFIG_EFI
  /*
-@@ -797,6 +807,8 @@ static inline bool efi_enabled(int feature)
+@@ -799,6 +809,8 @@ static inline bool efi_enabled(int feature)
  }
  extern void efi_reboot(enum reboot_mode reboot_mode, const char *__unused);
 
@@ -3060,7 +3643,7 @@ index 763b816ba19c..4c55e3aa7e95 100644
  bool __pure __efi_soft_reserve_enabled(void);
 
  static inline bool __pure efi_soft_reserve_enabled(void)
-@@ -817,6 +829,8 @@ static inline bool efi_enabled(int feature)
+@@ -819,6 +831,8 @@ static inline bool efi_enabled(int feature)
  static inline void
  efi_reboot(enum reboot_mode reboot_mode, const char *__unused) {}
 
@@ -3069,7 +3652,7 @@ index 763b816ba19c..4c55e3aa7e95 100644
  static inline bool efi_soft_reserve_enabled(void)
  {
  	return false;
-@@ -829,6 +843,7 @@ static inline bool efi_rt_services_supported(unsigned int mask)
+@@ -831,6 +845,7 @@ static inline bool efi_rt_services_supported(unsigned int mask)
  #endif
 
  extern int efi_status_to_err(efi_status_t status);
@@ -3077,7 +3660,7 @@ index 763b816ba19c..4c55e3aa7e95 100644
 
  /*
   * Variable Attributes
-@@ -1081,13 +1096,6 @@ static inline bool efi_runtime_disabled(void) { return true; }
+@@ -1083,13 +1098,6 @@ static inline bool efi_runtime_disabled(void) { return true; }
  extern void efi_call_virt_check_flags(unsigned long flags, const char *call);
  extern unsigned long efi_call_virt_save_flags(void);
 
@@ -3468,3 +4051,148 @@ index c45686172517..68bb977c6a37 100644
  		.acpi_hid = "808622A8",
  	},
  #endif
+diff --git a/sound/soc/sof/intel/apl.c b/sound/soc/sof/intel/apl.c
+index fc29b91b8932..c7ed2b3d6abc 100644
+--- a/sound/soc/sof/intel/apl.c
++++ b/sound/soc/sof/intel/apl.c
+@@ -27,9 +27,10 @@ static const struct snd_sof_debugfs_map apl_dsp_debugfs[] = {
+
+ /* apollolake ops */
+ const struct snd_sof_dsp_ops sof_apl_ops = {
+-	/* probe and remove */
++	/* probe/remove/shutdown */
+ 	.probe		= hda_dsp_probe,
+ 	.remove		= hda_dsp_remove,
++	.shutdown	= hda_dsp_shutdown,
+
+ 	/* Register IO */
+ 	.write		= sof_io_write,
+diff --git a/sound/soc/sof/intel/cnl.c b/sound/soc/sof/intel/cnl.c
+index e38db519f38d..094cde17a1b7 100644
+--- a/sound/soc/sof/intel/cnl.c
++++ b/sound/soc/sof/intel/cnl.c
+@@ -232,9 +232,10 @@ void cnl_ipc_dump(struct snd_sof_dev *sdev)
+
+ /* cannonlake ops */
+ const struct snd_sof_dsp_ops sof_cnl_ops = {
+-	/* probe and remove */
++	/* probe/remove/shutdown */
+ 	.probe		= hda_dsp_probe,
+ 	.remove		= hda_dsp_remove,
++	.shutdown	= hda_dsp_shutdown,
+
+ 	/* Register IO */
+ 	.write		= sof_io_write,
+diff --git a/sound/soc/sof/intel/hda-dsp.c b/sound/soc/sof/intel/hda-dsp.c
+index ea8e7ad8684d..d87cc16d53f6 100644
+--- a/sound/soc/sof/intel/hda-dsp.c
++++ b/sound/soc/sof/intel/hda-dsp.c
+@@ -892,6 +892,12 @@ int hda_dsp_suspend(struct snd_sof_dev *sdev, u32 target_state)
+ 	return snd_sof_dsp_set_power_state(sdev, &target_dsp_state);
+ }
+
++int hda_dsp_shutdown(struct snd_sof_dev *sdev)
++{
++	sdev->system_suspend_target = SOF_SUSPEND_S3;
++	return snd_sof_suspend(sdev->dev);
++}
++
+ int hda_dsp_set_hw_params_upon_resume(struct snd_sof_dev *sdev)
+ {
+ #if IS_ENABLED(CONFIG_SND_SOC_SOF_HDA)
+diff --git a/sound/soc/sof/intel/hda.h b/sound/soc/sof/intel/hda.h
+index a3b6f3e9121c..010577885913 100644
+--- a/sound/soc/sof/intel/hda.h
++++ b/sound/soc/sof/intel/hda.h
+@@ -512,6 +512,7 @@ int hda_dsp_resume(struct snd_sof_dev *sdev);
+ int hda_dsp_runtime_suspend(struct snd_sof_dev *sdev);
+ int hda_dsp_runtime_resume(struct snd_sof_dev *sdev);
+ int hda_dsp_runtime_idle(struct snd_sof_dev *sdev);
++int hda_dsp_shutdown(struct snd_sof_dev *sdev);
+ int hda_dsp_set_hw_params_upon_resume(struct snd_sof_dev *sdev);
+ void hda_dsp_dump_skl(struct snd_sof_dev *sdev, u32 flags);
+ void hda_dsp_dump(struct snd_sof_dev *sdev, u32 flags);
+diff --git a/sound/soc/sof/intel/icl.c b/sound/soc/sof/intel/icl.c
+index e9d5a0a58504..88a74be8a0c1 100644
+--- a/sound/soc/sof/intel/icl.c
++++ b/sound/soc/sof/intel/icl.c
+@@ -26,9 +26,10 @@ static const struct snd_sof_debugfs_map icl_dsp_debugfs[] = {
+
+ /* Icelake ops */
+ const struct snd_sof_dsp_ops sof_icl_ops = {
+-	/* probe and remove */
++	/* probe/remove/shutdown */
+ 	.probe		= hda_dsp_probe,
+ 	.remove		= hda_dsp_remove,
++	.shutdown	= hda_dsp_shutdown,
+
+ 	/* Register IO */
+ 	.write		= sof_io_write,
+diff --git a/sound/soc/sof/intel/tgl.c b/sound/soc/sof/intel/tgl.c
+index 2252ca38ff4b..4f661f042d4d 100644
+--- a/sound/soc/sof/intel/tgl.c
++++ b/sound/soc/sof/intel/tgl.c
+@@ -25,6 +25,7 @@ const struct snd_sof_dsp_ops sof_tgl_ops = {
+ 	/* probe and remove */
+ 	.probe		= hda_dsp_probe,
+ 	.remove		= hda_dsp_remove,
++	.shutdown       = hda_dsp_shutdown,
+
+ 	/* Register IO */
+ 	.write		= sof_io_write,
+diff --git a/sound/soc/sof/ops.h b/sound/soc/sof/ops.h
+index 95e748b36903..7562097bd7d5 100644
+--- a/sound/soc/sof/ops.h
++++ b/sound/soc/sof/ops.h
+@@ -37,6 +37,14 @@ static inline int snd_sof_remove(struct snd_sof_dev *sdev)
+ 	return 0;
+ }
+
++static inline int snd_sof_shutdown(struct snd_sof_dev *sdev)
++{
++	if (sof_ops(sdev)->shutdown)
++		return sof_ops(sdev)->shutdown(sdev);
++
++	return 0;
++}
++
+ /* control */
+
+ /*
+diff --git a/sound/soc/sof/sof-pci-dev.c b/sound/soc/sof/sof-pci-dev.c
+index 9adf50b20a73..a93b3aa6349c 100644
+--- a/sound/soc/sof/sof-pci-dev.c
++++ b/sound/soc/sof/sof-pci-dev.c
+@@ -269,7 +269,7 @@ static const struct sof_dev_desc ehl_desc = {
+ 	.default_tplg_path = "intel/sof-tplg",
+ 	.default_fw_filename = "sof-ehl.ri",
+ 	.nocodec_tplg_filename = "sof-ehl-nocodec.tplg",
+-	.ops = &sof_cnl_ops,
++	.ops = &sof_tgl_ops,
+ };
+ #endif
+
+diff --git a/sound/soc/sof/sof-priv.h b/sound/soc/sof/sof-priv.h
+index 68da8f797403..8d0c33c6d053 100644
+--- a/sound/soc/sof/sof-priv.h
++++ b/sound/soc/sof/sof-priv.h
+@@ -98,9 +98,10 @@ struct snd_sof_pdata;
+  */
+ struct snd_sof_dsp_ops {
+
+-	/* probe and remove */
++	/* probe/remove/shutdown */
+ 	int (*probe)(struct snd_sof_dev *sof_dev); /* mandatory */
+ 	int (*remove)(struct snd_sof_dev *sof_dev); /* optional */
++	int (*shutdown)(struct snd_sof_dev *sof_dev); /* optional */
+
+ 	/* DSP core boot / reset */
+ 	int (*run)(struct snd_sof_dev *sof_dev); /* mandatory */
+@@ -460,6 +461,7 @@ struct snd_sof_dev {
+
+ int snd_sof_device_probe(struct device *dev, struct snd_sof_pdata *plat_data);
+ int snd_sof_device_remove(struct device *dev);
++int snd_sof_device_shutdown(struct device *dev);
+
+ int snd_sof_runtime_suspend(struct device *dev);
+ int snd_sof_runtime_resume(struct device *dev);
