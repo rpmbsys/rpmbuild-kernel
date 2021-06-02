@@ -1,3 +1,36 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/888eb8b57a1716a604aa9b415c132788527e5a8e
+ 888eb8b57a1716a604aa9b415c132788527e5a8e can: isotp: prevent race between isotp_bind() and isotp_setsockopt()
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/30238ba3648a11cea389e4727ed44d2ea586ca74
+ 30238ba3648a11cea389e4727ed44d2ea586ca74 io_uring: truncate lengths larger than MAX_RW_COUNT on provide buffers
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/83fa05252400d9d4eb082a60dd20c7aa02e581a0
+ 83fa05252400d9d4eb082a60dd20c7aa02e581a0 bpf: Prevent writable memory-mapping of read-only ringbuf pages
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/ac6ff1a3a73dd80199ea5f4bfa42b5ef259a86c9
+ ac6ff1a3a73dd80199ea5f4bfa42b5ef259a86c9 bpf, ringbuf: Deny reserve of buffers larger than ringbuf
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/a248d25a33289e149fb07454f310668ff2e809ba
+ a248d25a33289e149fb07454f310668ff2e809ba bpf: Fix alu32 const subreg bound tracking on bitwise operations
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/f7a8b12d2afd1c5573cea621f7b45a74f538f079
+ f7a8b12d2afd1c5573cea621f7b45a74f538f079 net/nfc: fix use-after-free llcp_sock_bind/connect
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/398fc8a1fce86d37d63fefc15daca4da0f6189dd
+ 398fc8a1fce86d37d63fefc15daca4da0f6189dd ALSA: hda/realtek: Fix silent headphone output on ASUS UX430UA
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/3f376f878f898469dfbbc1b244b20ffb69f00076
+ 3f376f878f898469dfbbc1b244b20ffb69f00076 nitro_enclaves: Fix stale file descriptors on failed usercopy
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/8aa4dd3792cb3abf1ddfe8849373c929f766f349
+ 8aa4dd3792cb3abf1ddfe8849373c929f766f349 sfc: ef10: fix TX queue lookup in TX event handling
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/529556bc1873b233571c0b6ef943ab9c95ceb63c
+ 529556bc1873b233571c0b6ef943ab9c95ceb63c sfc: farch: fix TX queue lookup in TX event handling
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/7a830bef2ea006ce525cc542e4b1fb8698c96e70
+ 7a830bef2ea006ce525cc542e4b1fb8698c96e70 sfc: farch: fix TX queue lookup in TX flush done handling
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/2632d432606c16de479f4fd0140a6ddb56ebd2dd
  2632d432606c16de479f4fd0140a6ddb56ebd2dd Re-enable PSR2 on Tigerlake with new workarounds from Intel
 

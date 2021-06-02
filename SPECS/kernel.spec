@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.11.14
+%define rpmversion 5.11.21
 %define stableversion 5.11
 %define pkgrelease 300
 
@@ -2816,6 +2816,37 @@ fi
 #
 #
 %changelog
+* Fri May 14 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.21-0]
+- can: isotp: prevent race between isotp_bind() and isotp_setsockopt() (Norbert Slusarek)
+
+* Wed May 12 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.20-0]
+- io_uring: truncate lengths larger than MAX_RW_COUNT on provide buffers (Thadeu Lima de Souza Cascardo)
+- bpf: Prevent writable memory-mapping of read-only ringbuf pages (Andrii Nakryiko)
+- bpf, ringbuf: Deny reserve of buffers larger than ringbuf (Thadeu Lima de Souza Cascardo)
+- bpf: Fix alu32 const subreg bound tracking on bitwise operations (Daniel Borkmann)
+- net/nfc: fix use-after-free llcp_sock_bind/connect (Or Cohen)
+
+* Fri May 07 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.19-0]
+- Fedora-5.12: Make amd_pinctrl module builtin (Hans de Goede)
+- ALSA: hda/realtek: Fix silent headphone output on ASUS UX430UA (Takashi Iwai)
+- nitro_enclaves: Fix stale file descriptors on failed usercopy (Mathias Krause)
+
+* Mon May 03 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.18-0]
+- Enable mtdram for fedora (rhbz 1955916) (Justin M. Forbes)
+- hardlink is in /usr/bin/ (rhbz 1889043) (Justin M. Forbes)
+- sfc: ef10: fix TX queue lookup in TX event handling (Edward Cree)
+- sfc: farch: fix TX queue lookup in TX event handling (Edward Cree)
+- sfc: farch: fix TX queue lookup in TX flush done handling (Edward Cree)
+
+* Wed Apr 28 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.17-0]
+- Fedora: ARMv7: build for 16 CPUs. (Peter Robinson)
+
+* Wed Apr 21 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.16-0]
+- Turn off ADI_AXI_ADC and AD9467 which now require CONFIG_OF (Justin M. Forbes)
+
+* Fri Apr 16 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.15-0]
+- Turn on CONFIG_VDPA_SIM_NET (rhbz 1942343) (Justin M. Forbes)
+
 * Wed Apr 14 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.14-0]
 - Quick hack to reset release to 0 (Justin M. Forbes)
 - Add clarity to rebase notes since that change was backed out (Justin M. Forbes)

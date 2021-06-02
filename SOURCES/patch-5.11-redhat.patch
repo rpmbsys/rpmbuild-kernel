@@ -63,12 +63,14 @@
  kernel/crash_core.c                                |  28 +-
  kernel/module_signing.c                            |   9 +-
  mm/kmemleak.c                                      |   5 +
+ net/can/isotp.c                                    |  49 +-
  security/integrity/platform_certs/load_uefi.c      |   6 +-
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |   1 +
  security/security.c                                |   6 +
  sound/hda/Kconfig                                  |  14 +
  sound/hda/intel-dsp-config.c                       |  29 +-
+ sound/pci/hda/patch_realtek.c                      |  18 +
  sound/soc/sof/intel/apl.c                          |   3 +-
  sound/soc/sof/intel/cnl.c                          |   3 +-
  sound/soc/sof/intel/hda-dsp.c                      |   6 +
@@ -78,7 +80,7 @@
  sound/soc/sof/ops.h                                |   8 +
  sound/soc/sof/sof-pci-dev.c                        |   2 +-
  sound/soc/sof/sof-priv.h                           |   4 +-
- 80 files changed, 2378 insertions(+), 330 deletions(-)
+ 82 files changed, 2429 insertions(+), 346 deletions(-)
 
 diff --git a/Documentation/ABI/testing/sysfs-platform_profile b/Documentation/ABI/testing/sysfs-platform_profile
 new file mode 100644
@@ -292,7 +294,7 @@ index 000000000000..c33a71263d9e
 + 2. Add the new profile name, along with a clear description of the
 +    expected behaviour, to the sysfs-platform_profile ABI documentation.
 diff --git a/Makefile b/Makefile
-index 9116941553b8..39427f89a0cd 100644
+index 11ca74eabf47..cc33fcabfd5a 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -495,6 +495,7 @@ KBUILD_AFLAGS   := -D__ASSEMBLY__ -fno-PIE
@@ -304,10 +306,10 @@ index 9116941553b8..39427f89a0cd 100644
  		   -std=gnu89
  KBUILD_CPPFLAGS := -D__KERNEL__
 diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index 138248999df7..b962482a442e 100644
+index 3d2c684eab77..7a26e2e735d1 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
-@@ -1492,9 +1492,9 @@ config HIGHMEM
+@@ -1498,9 +1498,9 @@ config HIGHMEM
  	  If unsure, say n.
 
  config HIGHPTE
@@ -351,7 +353,7 @@ index a13d90206472..6a6aae01755b 100644
 
  #define get_user(x, p)							\
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 2517dd8c5a4d..c8dcf2660b24 100644
+index cd7f725b80d4..63ff09fffd7d 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
 @@ -904,7 +904,7 @@ endchoice
@@ -385,7 +387,7 @@ index 219b7507a10f..45769764425d 100644
 
  &cpu_b0 {
 diff --git a/arch/powerpc/kvm/book3s_hv.c b/arch/powerpc/kvm/book3s_hv.c
-index 6f612d240392..f2ddf7139a2a 100644
+index 138556cb559d..eaaf27624898 100644
 --- a/arch/powerpc/kvm/book3s_hv.c
 +++ b/arch/powerpc/kvm/book3s_hv.c
 @@ -3595,6 +3595,7 @@ static int kvmhv_p9_guest_entry(struct kvm_vcpu *vcpu, u64 time_limit,
@@ -396,7 +398,7 @@ index 6f612d240392..f2ddf7139a2a 100644
  	s64 dec;
  	u64 tb;
  	int trap, save_pmu;
-@@ -3735,6 +3736,9 @@ static int kvmhv_p9_guest_entry(struct kvm_vcpu *vcpu, u64 time_limit,
+@@ -3738,6 +3739,9 @@ static int kvmhv_p9_guest_entry(struct kvm_vcpu *vcpu, u64 time_limit,
  	if (host_amr != vcpu->arch.amr)
  		mtspr(SPRN_AMR, host_amr);
 
@@ -432,7 +434,7 @@ index 7a21eca498aa..565f143c9858 100644
 +	return !!ipl_secure_flag;
 +}
 diff --git a/arch/s390/kernel/setup.c b/arch/s390/kernel/setup.c
-index 1fbed91c73bc..73f5724342b1 100644
+index 69e96501e0e8..66758c16d665 100644
 --- a/arch/s390/kernel/setup.c
 +++ b/arch/s390/kernel/setup.c
 @@ -49,6 +49,7 @@
@@ -454,7 +456,7 @@ index 1fbed91c73bc..73f5724342b1 100644
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
 diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index df964571a6b4..200db376f728 100644
+index 54a3048ebc5b..45dabcea1f22 100644
 --- a/arch/x86/kernel/setup.c
 +++ b/arch/x86/kernel/setup.c
 @@ -19,6 +19,7 @@
@@ -479,7 +481,7 @@ index df964571a6b4..200db376f728 100644
  	dmi_setup();
 
  	/*
-@@ -1116,19 +1124,7 @@ void __init setup_arch(char **cmdline_p)
+@@ -1113,19 +1121,7 @@ void __init setup_arch(char **cmdline_p)
  	/* Allocate bigger log buffer */
  	setup_log_buf(1);
 
@@ -823,10 +825,10 @@ index 239eeeafc62f..bb8c046fc4cb 100644
  	acpi_dev_get_resources(device, &resource_list,
  			       acpi_check_serial_bus_slave,
 diff --git a/drivers/ata/libahci.c b/drivers/ata/libahci.c
-index ea5bf5f4cbed..71c55cae27ac 100644
+index fec2e9754aed..bea4e2973259 100644
 --- a/drivers/ata/libahci.c
 +++ b/drivers/ata/libahci.c
-@@ -666,6 +666,24 @@ int ahci_stop_engine(struct ata_port *ap)
+@@ -671,6 +671,24 @@ int ahci_stop_engine(struct ata_port *ap)
  	tmp &= ~PORT_CMD_START;
  	writel(tmp, port_mmio + PORT_CMD);
 
@@ -1474,7 +1476,7 @@ index b3631b722de3..5089dbd240f4 100644
  		return;
 
 diff --git a/drivers/gpu/drm/i915/i915_drv.c b/drivers/gpu/drm/i915/i915_drv.c
-index 99eb0d7bbc44..85feb5742296 100644
+index 31a197f172fd..218cfb6faa27 100644
 --- a/drivers/gpu/drm/i915/i915_drv.c
 +++ b/drivers/gpu/drm/i915/i915_drv.c
 @@ -609,14 +609,15 @@ static int i915_driver_hw_probe(struct drm_i915_private *dev_priv)
@@ -2351,7 +2353,7 @@ index 258d5fe3d395..f7298e3dc8f3 100644
  	if (data->f01_container->dev.driver) {
  		/* Driver already bound, so enable ATTN now. */
 diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
-index fd5f59373fc6..8a11aa9e0318 100644
+index 0e0140454de8..7a83d1d65eee 100644
 --- a/drivers/iommu/iommu.c
 +++ b/drivers/iommu/iommu.c
 @@ -7,6 +7,7 @@
@@ -2362,7 +2364,7 @@ index fd5f59373fc6..8a11aa9e0318 100644
  #include <linux/kernel.h>
  #include <linux/bug.h>
  #include <linux/types.h>
-@@ -3060,6 +3061,27 @@ u32 iommu_sva_get_pasid(struct iommu_sva *handle)
+@@ -3066,6 +3067,27 @@ u32 iommu_sva_get_pasid(struct iommu_sva *handle)
  }
  EXPORT_SYMBOL_GPL(iommu_sva_get_pasid);
 
@@ -2985,7 +2987,7 @@ index 5b81bafa5c16..cc42af2a0a98 100644
  }
  #endif
 diff --git a/drivers/platform/x86/thinkpad_acpi.c b/drivers/platform/x86/thinkpad_acpi.c
-index 9f8da7155a89..9ecf7829b3d8 100644
+index 77d457915925..02f9c281dd54 100644
 --- a/drivers/platform/x86/thinkpad_acpi.c
 +++ b/drivers/platform/x86/thinkpad_acpi.c
 @@ -66,6 +66,7 @@
@@ -2996,7 +2998,7 @@ index 9f8da7155a89..9ecf7829b3d8 100644
  #include <sound/core.h>
  #include <sound/control.h>
  #include <sound/initval.h>
-@@ -9850,6 +9851,11 @@ static struct ibm_struct lcdshadow_driver_data = {
+@@ -9863,6 +9864,11 @@ static struct ibm_struct lcdshadow_driver_data = {
   * Thinkpad sensor interfaces
   */
 
@@ -3008,7 +3010,7 @@ index 9f8da7155a89..9ecf7829b3d8 100644
  #define DYTC_CMD_GET          2 /* To get current IC function and mode */
  #define DYTC_GET_LAPMODE_BIT 17 /* Set when in lapmode */
 
-@@ -9860,17 +9866,56 @@ static bool has_palmsensor;
+@@ -9873,17 +9879,56 @@ static bool has_palmsensor;
  static bool has_lapsensor;
  static bool palm_state;
  static bool lap_state;
@@ -3070,7 +3072,7 @@ index 9f8da7155a89..9ecf7829b3d8 100644
 
  	*present = true; /*If we get his far, we have lapmode support*/
  	*state = output & BIT(DYTC_GET_LAPMODE_BIT) ? true : false;
-@@ -9968,7 +10013,18 @@ static int tpacpi_proxsensor_init(struct ibm_init_struct *iibm)
+@@ -9981,7 +10026,18 @@ static int tpacpi_proxsensor_init(struct ibm_init_struct *iibm)
  		if (err)
  			return err;
  	}
@@ -3090,7 +3092,7 @@ index 9f8da7155a89..9ecf7829b3d8 100644
  		err = sysfs_create_file(&tpacpi_pdev->dev.kobj, &dev_attr_dytc_lapmode.attr);
  		if (err)
  			return err;
-@@ -9989,6 +10045,434 @@ static struct ibm_struct proxsensor_driver_data = {
+@@ -10002,6 +10058,434 @@ static struct ibm_struct proxsensor_driver_data = {
  	.exit = proxsensor_exit,
  };
 
@@ -3525,7 +3527,7 @@ index 9f8da7155a89..9ecf7829b3d8 100644
  /****************************************************************************
   ****************************************************************************
   *
-@@ -10037,8 +10521,12 @@ static void tpacpi_driver_event(const unsigned int hkey_event)
+@@ -10050,8 +10534,12 @@ static void tpacpi_driver_event(const unsigned int hkey_event)
  		mutex_unlock(&kbdlight_mutex);
  	}
 
@@ -3539,7 +3541,7 @@ index 9f8da7155a89..9ecf7829b3d8 100644
  }
 
  static void hotkey_driver_event(const unsigned int scancode)
-@@ -10481,6 +10969,14 @@ static struct ibm_init_struct ibms_init[] __initdata = {
+@@ -10494,6 +10982,14 @@ static struct ibm_init_struct ibms_init[] __initdata = {
  		.init = tpacpi_proxsensor_init,
  		.data = &proxsensor_driver_data,
  	},
@@ -3555,10 +3557,10 @@ index 9f8da7155a89..9ecf7829b3d8 100644
 
  static int __init set_ibm_param(const char *val, const struct kernel_param *kp)
 diff --git a/drivers/scsi/smartpqi/smartpqi_init.c b/drivers/scsi/smartpqi/smartpqi_init.c
-index c53f456fbd09..ea190660c86e 100644
+index 5ff14b409c23..ec42020dcd58 100644
 --- a/drivers/scsi/smartpqi/smartpqi_init.c
 +++ b/drivers/scsi/smartpqi/smartpqi_init.c
-@@ -8313,6 +8313,18 @@ static const struct pci_device_id pqi_pci_id_table[] = {
+@@ -8338,6 +8338,18 @@ static const struct pci_device_id pqi_pci_id_table[] = {
  		PCI_DEVICE_SUB(PCI_VENDOR_ID_ADAPTEC2, 0x028f,
  			       0x19e5, 0xd22c)
  	},
@@ -3577,7 +3579,7 @@ index c53f456fbd09..ea190660c86e 100644
  	{
  		PCI_DEVICE_SUB(PCI_VENDOR_ID_ADAPTEC2, 0x028f,
  			       PCI_VENDOR_ID_ADAPTEC2, 0x0110)
-@@ -8453,6 +8465,10 @@ static const struct pci_device_id pqi_pci_id_table[] = {
+@@ -8594,6 +8606,10 @@ static const struct pci_device_id pqi_pci_id_table[] = {
  		PCI_DEVICE_SUB(PCI_VENDOR_ID_ADAPTEC2, 0x028f,
  			       PCI_VENDOR_ID_ADVANTECH, 0x8312)
  	},
@@ -3589,7 +3591,7 @@ index c53f456fbd09..ea190660c86e 100644
  		PCI_DEVICE_SUB(PCI_VENDOR_ID_ADAPTEC2, 0x028f,
  			       PCI_VENDOR_ID_DELL, 0x1fe0)
 diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
-index 7f71218cc1e5..283fc0f41cd2 100644
+index 404507d1b76f..51ee8f28a60b 100644
 --- a/drivers/usb/core/hub.c
 +++ b/drivers/usb/core/hub.c
 @@ -5532,6 +5532,13 @@ static void hub_event(struct work_struct *work)
@@ -3900,6 +3902,95 @@ index c0014d3b91c1..c00e9820412a 100644
  	kmemleak_initialized = 1;
 
  	debugfs_create_file("kmemleak", 0644, NULL, NULL, &kmemleak_fops);
+diff --git a/net/can/isotp.c b/net/can/isotp.c
+index 9f94ad3caee9..253b24417c8e 100644
+--- a/net/can/isotp.c
++++ b/net/can/isotp.c
+@@ -1062,27 +1062,31 @@ static int isotp_bind(struct socket *sock, struct sockaddr *uaddr, int len)
+ 	if (len < ISOTP_MIN_NAMELEN)
+ 		return -EINVAL;
+
++	if (addr->can_addr.tp.tx_id & (CAN_ERR_FLAG | CAN_RTR_FLAG))
++		return -EADDRNOTAVAIL;
++
++	if (!addr->can_ifindex)
++		return -ENODEV;
++
++	lock_sock(sk);
++
+ 	/* do not register frame reception for functional addressing */
+ 	if (so->opt.flags & CAN_ISOTP_SF_BROADCAST)
+ 		do_rx_reg = 0;
+
+ 	/* do not validate rx address for functional addressing */
+ 	if (do_rx_reg) {
+-		if (addr->can_addr.tp.rx_id == addr->can_addr.tp.tx_id)
+-			return -EADDRNOTAVAIL;
++		if (addr->can_addr.tp.rx_id == addr->can_addr.tp.tx_id) {
++			err = -EADDRNOTAVAIL;
++			goto out;
++		}
+
+-		if (addr->can_addr.tp.rx_id & (CAN_ERR_FLAG | CAN_RTR_FLAG))
+-			return -EADDRNOTAVAIL;
++		if (addr->can_addr.tp.rx_id & (CAN_ERR_FLAG | CAN_RTR_FLAG)) {
++			err = -EADDRNOTAVAIL;
++			goto out;
++		}
+ 	}
+
+-	if (addr->can_addr.tp.tx_id & (CAN_ERR_FLAG | CAN_RTR_FLAG))
+-		return -EADDRNOTAVAIL;
+-
+-	if (!addr->can_ifindex)
+-		return -ENODEV;
+-
+-	lock_sock(sk);
+-
+ 	if (so->bound && addr->can_ifindex == so->ifindex &&
+ 	    addr->can_addr.tp.rx_id == so->rxid &&
+ 	    addr->can_addr.tp.tx_id == so->txid)
+@@ -1164,16 +1168,13 @@ static int isotp_getname(struct socket *sock, struct sockaddr *uaddr, int peer)
+ 	return ISOTP_MIN_NAMELEN;
+ }
+
+-static int isotp_setsockopt(struct socket *sock, int level, int optname,
++static int isotp_setsockopt_locked(struct socket *sock, int level, int optname,
+ 			    sockptr_t optval, unsigned int optlen)
+ {
+ 	struct sock *sk = sock->sk;
+ 	struct isotp_sock *so = isotp_sk(sk);
+ 	int ret = 0;
+
+-	if (level != SOL_CAN_ISOTP)
+-		return -EINVAL;
+-
+ 	if (so->bound)
+ 		return -EISCONN;
+
+@@ -1248,6 +1249,22 @@ static int isotp_setsockopt(struct socket *sock, int level, int optname,
+ 	return ret;
+ }
+
++static int isotp_setsockopt(struct socket *sock, int level, int optname,
++			    sockptr_t optval, unsigned int optlen)
++
++{
++	struct sock *sk = sock->sk;
++	int ret;
++
++	if (level != SOL_CAN_ISOTP)
++		return -EINVAL;
++
++	lock_sock(sk);
++	ret = isotp_setsockopt_locked(sock, level, optname, optval, optlen);
++	release_sock(sk);
++	return ret;
++}
++
+ static int isotp_getsockopt(struct socket *sock, int level, int optname,
+ 			    char __user *optval, int __user *optlen)
+ {
 diff --git a/security/integrity/platform_certs/load_uefi.c b/security/integrity/platform_certs/load_uefi.c
 index ee4b4c666854..eff9ff593405 100644
 --- a/security/integrity/platform_certs/load_uefi.c
@@ -4051,6 +4142,56 @@ index c45686172517..68bb977c6a37 100644
  		.acpi_hid = "808622A8",
  	},
  #endif
+diff --git a/sound/pci/hda/patch_realtek.c b/sound/pci/hda/patch_realtek.c
+index 8ec57bd351df..213a3311baff 100644
+--- a/sound/pci/hda/patch_realtek.c
++++ b/sound/pci/hda/patch_realtek.c
+@@ -5717,6 +5717,18 @@ static void alc_fixup_tpt470_dacs(struct hda_codec *codec,
+ 		spec->gen.preferred_dacs = preferred_pairs;
+ }
+
++static void alc295_fixup_asus_dacs(struct hda_codec *codec,
++				   const struct hda_fixup *fix, int action)
++{
++	static const hda_nid_t preferred_pairs[] = {
++		0x17, 0x02, 0x21, 0x03, 0
++	};
++	struct alc_spec *spec = codec->spec;
++
++	if (action == HDA_FIXUP_ACT_PRE_PROBE)
++		spec->gen.preferred_dacs = preferred_pairs;
++}
++
+ static void alc_shutup_dell_xps13(struct hda_codec *codec)
+ {
+ 	struct alc_spec *spec = codec->spec;
+@@ -6481,6 +6493,7 @@ enum {
+ 	ALC282_FIXUP_ACER_DISABLE_LINEOUT,
+ 	ALC255_FIXUP_ACER_LIMIT_INT_MIC_BOOST,
+ 	ALC256_FIXUP_ACER_HEADSET_MIC,
++	ALC295_FIXUP_ASUS_DACS,
+ };
+
+ static const struct hda_fixup alc269_fixups[] = {
+@@ -7973,6 +7986,10 @@ static const struct hda_fixup alc269_fixups[] = {
+ 		.chained = true,
+ 		.chain_id = ALC269_FIXUP_HEADSET_MODE_NO_HP_MIC
+ 	},
++	[ALC295_FIXUP_ASUS_DACS] = {
++		.type = HDA_FIXUP_FUNC,
++		.v.func = alc295_fixup_asus_dacs,
++	},
+ };
+
+ static const struct snd_pci_quirk alc269_fixup_tbl[] = {
+@@ -8171,6 +8188,7 @@ static const struct snd_pci_quirk alc269_fixup_tbl[] = {
+ 	SND_PCI_QUIRK(0x1043, 0x1427, "Asus Zenbook UX31E", ALC269VB_FIXUP_ASUS_ZENBOOK),
+ 	SND_PCI_QUIRK(0x1043, 0x1517, "Asus Zenbook UX31A", ALC269VB_FIXUP_ASUS_ZENBOOK_UX31A),
+ 	SND_PCI_QUIRK(0x1043, 0x16e3, "ASUS UX50", ALC269_FIXUP_STEREO_DMIC),
++	SND_PCI_QUIRK(0x1043, 0x1740, "ASUS UX430UA", ALC295_FIXUP_ASUS_DACS),
+ 	SND_PCI_QUIRK(0x1043, 0x17d1, "ASUS UX431FL", ALC294_FIXUP_ASUS_DUAL_SPK),
+ 	SND_PCI_QUIRK(0x1043, 0x1881, "ASUS Zephyrus S/M", ALC294_FIXUP_ASUS_GX502_PINS),
+ 	SND_PCI_QUIRK(0x1043, 0x18b1, "Asus MJ401TA", ALC256_FIXUP_ASUS_HEADSET_MIC),
 diff --git a/sound/soc/sof/intel/apl.c b/sound/soc/sof/intel/apl.c
 index fc29b91b8932..c7ed2b3d6abc 100644
 --- a/sound/soc/sof/intel/apl.c
