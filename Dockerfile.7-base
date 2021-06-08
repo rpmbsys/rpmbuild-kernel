@@ -32,6 +32,5 @@ RUN yum -y install \
 
 RUN yum -y --enablerepo bintray-custom install \
         dwarves \
-        gcc-c++ \
         gcc-plugin-devel \
     && yum clean all && rm -rf /var/cache/yum
