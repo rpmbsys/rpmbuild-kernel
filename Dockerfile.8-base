@@ -10,6 +10,7 @@ RUN yum -y install \
         binutils-devel \
         dwarves \
         elfutils-devel \
+        gcc-c++ \
         gcc-plugin-devel \
         gettext \
         hmaccalc \
