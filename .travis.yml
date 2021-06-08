@@ -34,4 +34,4 @@ jobs:
           - docker-compose -f rpmbuild/docker-compose.bintray.yml run --rm -e BINTRAY_USER=$BINTRAY_USER -e BINTRAY_API_KEY=$BINTRAY_API_KEY -e BINTRAY_REPO=$BINTRAY_REPO -e ARTIFACTORY_URL=$ARTIFACTORY_URL ${UPLOADER}
         on:
           all_branches: true
-      env: BASE=centos7base512 BUILD=centos7kernelonly512 UPLOADER=centos7bintray
+      env: BASE=centos7base BUILD=centos7kernelonly UPLOADER=centos7bintray
