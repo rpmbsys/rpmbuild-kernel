@@ -1,5 +1,5 @@
 ARG centos=7.9.2009
-FROM aursu/rpmbuild:${centos}-base-kernel512
+FROM aursu/rpmbuild:${centos}-base-kernel
 
 ENV rpmversion=5.12.9
 

@@ -1,6 +1,6 @@
 version: "3.4"
 services:
-  centos7build512:
+  centos7build:
     volumes:
       - rpms:/home/centos/rpmbuild/SRPMS
       - rpm7:/home/centos/rpmbuild/RPMS
@@ -14,7 +14,7 @@ services:
       "--without", "debuginfo",
       "--without", "kabidwchk",
       "--without", "kabidw-base"]
-  centos7kernelonly512:
+  centos7kernelonly:
     volumes:
       - rpms:/home/centos/rpmbuild/SRPMS
       - rpm7:/home/centos/rpmbuild/RPMS
@@ -35,7 +35,7 @@ services:
       "--without", "gcov",
       "--without", "ipaclones",
       "--without", "kernel-abi-whitelists"]
-  centos7kernelvanilla512:
+  centos7kernelvanilla:
     volumes:
       - rpms:/home/centos/rpmbuild/SRPMS
       - rpm7:/home/centos/rpmbuild/RPMS
@@ -57,7 +57,7 @@ services:
       "--without", "ipaclones",
       "--without", "kernel-abi-whitelists",
       "--with",    "vanilla"]
-  centos8build512:
+  centos8build:
     volumes:
       - rpms:/home/centos/rpmbuild/SRPMS
       - rpm8:/home/centos/rpmbuild/RPMS
@@ -71,7 +71,7 @@ services:
       "--without", "debuginfo",
       "--without", "kabidwchk",
       "--without", "kabidw-base"]
-  centos8kernelonly512:
+  centos8kernelonly:
     volumes:
       - rpms:/home/centos/rpmbuild/SRPMS
       - rpm8:/home/centos/rpmbuild/RPMS
