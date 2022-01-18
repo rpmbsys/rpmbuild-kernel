@@ -8,6 +8,7 @@ RUN yum -y install \
         audit-libs-devel \
         bc \
         binutils-devel \
+        bpftool \
         dwarves \
         elfutils-devel \
         gcc-plugin-devel \
