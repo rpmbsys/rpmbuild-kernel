@@ -2109,10 +2109,10 @@ BuildKernel() {
     # the F17 UsrMove feature.
     ln -sf $DevelDir $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
 
-%ifnarch armv7hl
-    # Generate vmlinux.h and put it to kernel-devel path
-    bpftool btf dump file vmlinux format c > $RPM_BUILD_ROOT/$DevelDir/vmlinux.h
-%endif
+# % ifnarch armv7hl
+#     # Generate vmlinux.h and put it to kernel-devel path
+#     bpftool btf dump file vmlinux format c > $RPM_BUILD_ROOT/$DevelDir/vmlinux.h
+# % endif
 
     # prune junk from kernel-devel
     find $RPM_BUILD_ROOT/usr/src/kernels -name ".*.cmd" -delete
