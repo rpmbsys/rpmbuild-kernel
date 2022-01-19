@@ -92,6 +92,27 @@ services:
       "--without", "gcov",
       "--without", "ipaclones",
       "--without", "kernel-abi-whitelists"]
+  stream8kernelonly:
+    volumes:
+      - rpms:/home/centos/rpmbuild/SRPMS
+      - rpm8stream:/home/centos/rpmbuild/RPMS
+    build:
+      context: .
+      args:
+        centos: stream8
+    command: ["-ba",
+      "--without", "doc",
+      "--without", "selftests",
+      "--without", "debuginfo",
+      "--without", "kabidwchk",
+      "--without", "kabidw-base",
+      "--with",    "baseonly",
+      "--without", "perf",
+      "--without", "tools",
+      "--without", "bpftool",
+      "--without", "gcov",
+      "--without", "ipaclones",
+      "--without", "kernel-abi-whitelists"]
 
 volumes:
   rpms:
@@ -100,3 +121,5 @@ volumes:
     name: rpm7
   rpm8:
     name: rpm8
+  rpm8stream:
+    name: rpm8stream

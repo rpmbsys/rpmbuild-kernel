@@ -21,15 +21,18 @@ jobs:
             base: centos7base
             build: centos7kernelonly
             uploader: centos7bintray
+            repo_path: ""
           - compose-file: docker-compose.yml
-            base: centos8base
-            build: centos8kernelonly
-            uploader: centos8bintray
+            base: stream8base
+            build: stream8kernelonly
+            uploader: stream8bintray
+            repo_path: centos/8-stream
     env:
       BUILD_COMPOSE_FILE: ${{ matrix.compose-file }}
       BASE: ${{ matrix.base }}
       BUILD: ${{ matrix.build }}
       UPLOADER: ${{ matrix.uploader }}
+      REPO_PATH: ${{ matrix.repo_path }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -38,4 +41,4 @@ jobs:
       - run: docker-compose -f $BUILD_COMPOSE_FILE build --no-cache $BUILD
       - run: docker-compose -f $BUILD_COMPOSE_FILE up --exit-code-from $BUILD $BUILD
       - run: docker-compose -f rpmbuild/docker-compose.bintray.yml pull $UPLOADER
-      - run: docker-compose -f rpmbuild/docker-compose.bintray.yml run --rm -e BINTRAY_USER=$BINTRAY_USER -e BINTRAY_API_KEY=$BINTRAY_API_KEY -e BINTRAY_REPO=$BINTRAY_REPO -e ARTIFACTORY_URL=$ARTIFACTORY_URL $UPLOADER
+      - run: docker-compose -f rpmbuild/docker-compose.bintray.yml run --rm -e BINTRAY_USER=$BINTRAY_USER -e BINTRAY_API_KEY=$BINTRAY_API_KEY -e BINTRAY_REPO=$BINTRAY_REPO -e ARTIFACTORY_URL=$ARTIFACTORY_URL -e REPO_PATH=$REPO_PATH $UPLOADER
