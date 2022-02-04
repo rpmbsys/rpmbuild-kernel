@@ -69,7 +69,6 @@ services:
       "--without", "kabidw-base"]
   stream8kernelonly:
     volumes:
-      - rpms:/home/centos/rpmbuild/SRPMS
       - rpm8stream:/home/centos/rpmbuild/RPMS
     build:
       context: .
