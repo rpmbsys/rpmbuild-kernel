@@ -2,7 +2,6 @@ version: "3.4"
 services:
   centos7build:
     volumes:
-      - rpms:/home/centos/rpmbuild/SRPMS
       - rpm7:/home/centos/rpmbuild/RPMS
     build:
       context: .
@@ -16,7 +15,6 @@ services:
       "--without", "kabidw-base"]
   centos7kernelonly:
     volumes:
-      - rpms:/home/centos/rpmbuild/SRPMS
       - rpm7:/home/centos/rpmbuild/RPMS
     build:
       context: .
@@ -37,7 +35,6 @@ services:
       "--without", "kernel-abi-whitelists"]
   centos7kernelvanilla:
     volumes:
-      - rpms:/home/centos/rpmbuild/SRPMS
       - rpm7:/home/centos/rpmbuild/RPMS
     build:
       context: .
@@ -57,41 +54,19 @@ services:
       "--without", "ipaclones",
       "--without", "kernel-abi-whitelists",
       "--with",    "vanilla"]
-  centos8build:
+  stream8build:
     volumes:
-      - rpms:/home/centos/rpmbuild/SRPMS
-      - rpm8:/home/centos/rpmbuild/RPMS
+      - rpm8stream:/home/centos/rpmbuild/RPMS
     build:
       context: .
       args:
-        centos: $OS8
+        centos: stream8
     command: ["-ba",
       "--without", "doc",
       "--without", "selftests",
       "--without", "debuginfo",
       "--without", "kabidwchk",
       "--without", "kabidw-base"]
-  centos8kernelonly:
-    volumes:
-      - rpms:/home/centos/rpmbuild/SRPMS
-      - rpm8:/home/centos/rpmbuild/RPMS
-    build:
-      context: .
-      args:
-        centos: $OS8
-    command: ["-ba",
-      "--without", "doc",
-      "--without", "selftests",
-      "--without", "debuginfo",
-      "--without", "kabidwchk",
-      "--without", "kabidw-base",
-      "--with",    "baseonly",
-      "--without", "perf",
-      "--without", "tools",
-      "--without", "bpftool",
-      "--without", "gcov",
-      "--without", "ipaclones",
-      "--without", "kernel-abi-whitelists"]
   stream8kernelonly:
     volumes:
       - rpms:/home/centos/rpmbuild/SRPMS
@@ -115,11 +90,7 @@ services:
       "--without", "kernel-abi-whitelists"]
 
 volumes:
-  rpms:
-    name: rpms
   rpm7:
     name: rpm7
-  rpm8:
-    name: rpm8
   rpm8stream:
     name: rpm8stream

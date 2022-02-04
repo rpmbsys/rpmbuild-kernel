@@ -7,13 +7,6 @@ services:
       args:
         centos: $OS7
     image: "aursu/rpmbuild:${OS7}-base-kernel"
-  centos8base:
-    build:
-      context: .
-      dockerfile: Dockerfile.8-base
-      args:
-        centos: $OS8
-    image: "aursu/rpmbuild:${OS8}-base-kernel"
   stream8base:
     build:
       context: .
