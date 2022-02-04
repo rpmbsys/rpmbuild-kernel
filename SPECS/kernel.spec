@@ -128,7 +128,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.15
 
-%define rpmversion 5.15.15
+%define rpmversion 5.15.18
 %define patchversion 5.15
 %define pkgrelease 100
 
@@ -3006,6 +3006,15 @@ fi
 #
 #
 %changelog
+* Sat Jan 29 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.15.18-0]
+- Linux v5.15.18 (Justin M. Forbes)
+
+* Thu Jan 27 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.15.17-0]
+- Revert "PCI/MSI: Mask MSI-X vectors only on success" (Justin M. Forbes)
+
+* Thu Jan 20 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.15.16-0]
+- drm/amdgpu: don't do resets on APUs which don't support it (Alex Deucher)
+
 * Sun Jan 16 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.15.15-0]
 - netfilter: nat: force port remap to prevent shadowing well-known ports (Florian Westphal)
 - netfilter: conntrack: tag conntracks picked up in local out hook (Florian Westphal)
