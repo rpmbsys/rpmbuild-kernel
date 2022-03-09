@@ -128,7 +128,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.15
 
-%define rpmversion 5.15.18
+%define rpmversion 5.15.27
 %define patchversion 5.15
 %define pkgrelease 100
 
@@ -3006,6 +3006,9 @@ fi
 #
 #
 %changelog
+* Wed Mar 09 2022 Alexander Ursu <alexander.ursu@gmail.com> [5.15.27-0]
+- Linux v5.15.27
+
 * Sat Jan 29 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.15.18-0]
 - Linux v5.15.18 (Justin M. Forbes)
 
