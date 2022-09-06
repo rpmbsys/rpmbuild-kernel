@@ -11,14 +11,19 @@ RUN sed -i '/metalink=/s/https/http/' /etc/yum.repos.d/epel.repo \
         binutils-devel \
         binutils-x86_64-linux-gnu \
         bpftool \
+        clang \
         elfutils-devel \
         gcc-x86_64-linux-gnu \
         gettext \
         glibc-static \
         hmaccalc \
         java-devel \
+        libbabeltrace-devel \
         libcap-devel \
         libcap-ng-devel \
+        libmnl-devel \
+        libnl3-devel \
+        llvm \
         ncurses-devel \
         net-tools \
         newt-devel \
