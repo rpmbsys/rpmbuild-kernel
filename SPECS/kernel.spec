@@ -646,7 +646,9 @@ BuildRequires: libcap-devel libcap-ng-devel rsync libmnl-devel
 BuildConflicts: rhbuildsys(DiskFree) < 500Mb
 %if %{with_debuginfo}
 BuildRequires: rpm-build, elfutils
+%if 0%{?rhel} > 7
 BuildConflicts: rpm < 4.13.0.1-19
+%endif
 BuildConflicts: dwarves < 1.13
 # Most of these should be enabled after more investigation
 %undefine _include_minidebuginfo
