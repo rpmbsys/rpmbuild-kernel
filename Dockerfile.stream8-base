@@ -12,6 +12,7 @@ RUN yum -y install \
         elfutils-devel \
         gcc-plugin-devel \
         gettext \
+        glibc-static \
         hmaccalc \
         hostname \
         java-devel \
@@ -28,6 +29,7 @@ RUN yum -y install \
         perl-devel perl-generators "perl(ExtUtils::Embed)" \
         pesign \
         python3-devel python3-docutils \
+        system-sb-certs \
         xmlto \
         xz-devel \
         zlib-devel \
