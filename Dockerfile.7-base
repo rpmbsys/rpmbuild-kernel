@@ -3,7 +3,8 @@ ARG centos=7.9.2009
 FROM aursu/rpmbuild:${centos}-build-gcc8
 
 USER root
-RUN yum -y install \
+RUN sed -i '/metalink=/s/https/http/' /etc/yum.repos.d/epel.repo \
+    && yum -y install \
         asciidoc \
         audit-libs-devel \
         binutils-devel \
