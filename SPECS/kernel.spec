@@ -664,7 +664,7 @@ BuildRequires: kabi-dw
 BuildRequires: openssl
 %if %{signkernel}
 # ELN uses Fedora signing process, so exclude
-%if 0%{?rhel}%{?centos} && !0%{?eln}
+%if 0%{?rhel} >= 9 && !0%{?eln}
 BuildRequires: system-sb-certs
 %endif
 %ifarch x86_64 aarch64
