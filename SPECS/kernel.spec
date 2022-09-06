@@ -600,9 +600,11 @@ BuildRequires: sparse
 BuildRequires: zlib-devel binutils-devel newt-devel perl(ExtUtils::Embed) bison flex xz-devel
 BuildRequires: audit-libs-devel
 BuildRequires: java-devel
-BuildRequires: libbpf-devel
 BuildRequires: libbabeltrace-devel
+%if 0%{?rhel} > 7 || 0%{?fedora}
 BuildRequires: libtraceevent-devel
+BuildRequires: libbpf-devel
+%endif
 %ifnarch %{arm} s390x
 BuildRequires: numactl-devel
 %endif
@@ -613,7 +615,9 @@ BuildRequires: opencsd-devel >= 1.0.0
 %if %{with_tools}
 BuildRequires: gettext ncurses-devel
 BuildRequires: libcap-devel libcap-ng-devel
+%if 0%{?fedora}
 BuildRequires: libtracefs-devel
+%endif
 %ifnarch s390x
 BuildRequires: pciutils-devel
 %endif
@@ -2272,8 +2276,13 @@ InitBuildVars
 %ifarch aarch64
 %global perf_build_extra_opts CORESIGHT=1
 %endif
+%if 0%{?rhel} > 7 || 0%{?fedora}
 %global perf_make \
   %{__make} %{?make_opts} EXTRA_CFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags}" %{?cross_opts} -C tools/perf V=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 LIBBPF_DYNAMIC=1 LIBTRACEEVENT_DYNAMIC=1 %{?perf_build_extra_opts} prefix=%{_prefix} PYTHON=%{__python3}
+%else
+%global perf_make \
+  %{__make} %{?make_opts} EXTRA_CFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags}" %{?cross_opts} -C tools/perf V=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 %{?perf_build_extra_opts} prefix=%{_prefix} PYTHON=%{__python3}
+%endif
 %if %{with_perf}
 # perf
 # make sure check-headers.sh is executable
