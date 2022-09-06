@@ -3,6 +3,7 @@ ARG centos=7.9.2009
 FROM aursu/rpmbuild:${centos}-build-gcc8
 
 USER root
+# EPEL is broken behind HTTPS
 RUN sed -i '/metalink=/s/https/http/' /etc/yum.repos.d/epel.repo \
     && yum -y install \
         asciidoc \
@@ -13,6 +14,7 @@ RUN sed -i '/metalink=/s/https/http/' /etc/yum.repos.d/epel.repo \
         elfutils-devel \
         gcc-x86_64-linux-gnu \
         gettext \
+        glibc-static \
         hmaccalc \
         java-devel \
         libcap-devel \
