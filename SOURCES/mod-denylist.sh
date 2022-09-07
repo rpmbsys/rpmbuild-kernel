@@ -66,7 +66,7 @@ foreachp()
 
 		bgcount=$((bgcount + 1))
 		if [ $bgcount -eq "$P" ]; then
-			wait -n
+			wait
 			bgcount=$((bgcount - 1))
 		fi
 	done
