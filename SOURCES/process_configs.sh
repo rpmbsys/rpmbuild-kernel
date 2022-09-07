@@ -313,7 +313,7 @@ function process_configs()
 		process_config "$cfg" "$count" &
 		waitpids[${count}]=$!
 		((count++))
-		while [ "$(jobs | grep -c Running)" -ge "$RHJOBS" ]; do :; done
+		while [ $(jobs | grep -c Running) -ge $RHJOBS ]; do :; done
 	done
 	for pid in ${waitpids[*]}; do
 		wait ${pid}
