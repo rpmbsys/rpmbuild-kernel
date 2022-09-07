@@ -346,6 +346,9 @@ CC_IS_CLANG=0
 
 RETURNCODE=0
 
+[ -z "$RHJOBS" ] && export RHJOBS=$(/usr/bin/getconf _NPROCESSORS_ONLN)
+[ -z "$RHJOBS" ] && export RHJOBS=1
+
 while [[ $# -gt 0 ]]
 do
 	key="$1"
