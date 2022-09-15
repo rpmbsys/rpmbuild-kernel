@@ -124,17 +124,17 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specversion 5.19.7
+%define specversion 5.19.9
 %define patchversion 5.19
 %define pkgrelease 100
 %define kversion 5
-%define tarfile_release 5.19.7
+%define tarfile_release 5.19.9
 # This is needed to do merge window version magic
 %define patchlevel 19
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 100%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 5.19.7
+%define kabiversion 5.19.9
 #
 # End of genspec.sh variables
 #
@@ -3126,6 +3126,18 @@ fi
 #
 #
 %changelog
+* Thu Sep 15 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.19.9-0]
+- Add CONFIG_ARM64_ERRATUM_2457168 as new stable config option (Justin M. Forbes)
+- fedora: disable IWLMEI (Peter Robinson)
+- [PATCH] drm/i915: Ensure damage clip area is within pipe area (Mark Pearson)
+- [PATCH] drm/i915/psr: Use full update In case of area calculation fails (Mark Pearson)
+- Config update for stable ARM64_ERRATUM_2441009 (Justin M. Forbes)
+- Linux v5.19.9
+
+* Thu Sep 08 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.19.8-0]
+- [PATCH] drm/i915/bios: Use hardcoded fp_timing size for generating  LFP data pointers (Mark Pearson)
+- Linux v5.19.8
+
 * Mon Sep 05 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.19.7-0]
 - New config item for 5.19.7 (Justin M. Forbes)
 - Linux v5.19.7

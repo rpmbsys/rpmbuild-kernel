@@ -1,7 +1,7 @@
 ARG centos=7.9.2009
 FROM aursu/rpmbuild:${centos}-base-kernel
 
-ENV tarfile_release=5.19.7
+ENV tarfile_release=5.19.9
 
 COPY SOURCES ${BUILD_TOPDIR}/SOURCES
 ADD https://www.kernel.org/pub/linux/kernel/v5.x/linux-${tarfile_release}.tar.xz ${BUILD_TOPDIR}/SOURCES
