@@ -33,27 +33,6 @@ services:
       "--without", "gcov",
       "--without", "ipaclones",
       "--without", "kernel-abi-whitelists"]
-  centos7kernelvanilla:
-    volumes:
-      - rpm7:/home/centos/rpmbuild/RPMS
-    build:
-      context: .
-      args:
-        centos: $OS7
-    command: ["-ba",
-      "--without", "doc",
-      "--without", "selftests",
-      "--without", "debuginfo",
-      "--without", "kabidwchk",
-      "--without", "kabidw-base",
-      "--with",    "baseonly",
-      "--without", "perf",
-      "--without", "tools",
-      "--without", "bpftool",
-      "--without", "gcov",
-      "--without", "ipaclones",
-      "--without", "kernel-abi-whitelists",
-      "--with",    "vanilla"]
   stream8build:
     volumes:
       - rpm8stream:/home/centos/rpmbuild/RPMS
