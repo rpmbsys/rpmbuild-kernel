@@ -92,6 +92,7 @@ Summary: The Linux kernel
 %if %{zipmodules}
 %global zipsed -e 's/\.ko$/\.ko.xz/'
 # for parallel xz processes, replace with 1 to go back to single process
+%global zcpu `nproc --all`
 %endif
 
 %if 0%{?fedora}
@@ -829,7 +830,6 @@ Source81: process_configs.sh
 Source82: update_scripts.sh
 
 Source84: mod-internal.list
-Source85: mod-partner.list
 
 Source100: rheldup3.x509
 Source101: rhelkpatch1.x509
@@ -1304,32 +1304,8 @@ Requires: kernel-core-uname-r = %{KVERREL}\
 %{expand:%%kernel_modules_extra_package %{?1:%{1}} %{!?{-n}:%{1}}%{?{-n}:%{-n*}} %{-m:%{-m}}}\
 %if %{-m:0}%{!-m:1}\
 %{expand:%%kernel_modules_internal_package %{?1:%{1}} %{!?{-n}:%{1}}%{?{-n}:%{-n*}}}\
-%if 0%{!?fedora:1}\
-%{expand:%%kernel_modules_partner_package %{?1:%{1}} %{!?{-n}:%{1}}%{?{-n}:%{-n*}}}\
-%endif\
 %{expand:%%kernel_debuginfo_package %{?1:%{1}}}\
 %endif\
-%{nil}
-
-#
-# This macro creates a kernel-<subpackage>-modules-partner package.
-#	%%kernel_modules_partner_package <subpackage> <pretty-name>
-#
-%define kernel_modules_partner_package() \
-%package %{?1:%{1}-}modules-partner\
-Summary: Extra kernel modules to match the %{?2:%{2} }kernel\
-Group: System Environment/Kernel\
-Provides: kernel%{?1:-%{1}}-modules-partner-%{_target_cpu} = %{version}-%{release}\
-Provides: kernel%{?1:-%{1}}-modules-partner-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
-Provides: kernel%{?1:-%{1}}-modules-partner = %{version}-%{release}%{?1:+%{1}}\
-Provides: installonlypkg(kernel-module)\
-Provides: kernel%{?1:-%{1}}-modules-partner-uname-r = %{KVERREL}%{?1:+%{1}}\
-Requires: kernel-uname-r = %{KVERREL}%{?1:+%{1}}\
-Requires: kernel%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?1:+%{1}}\
-AutoReq: no\
-AutoProv: yes\
-%description %{?1:%{1}-}modules-partner\
-This package provides kernel modules for the %{?2:%{2} }kernel package for Red Hat partners usage.\
 %{nil}
 
 # Now, each variant package.
@@ -2090,10 +2066,6 @@ BuildKernel() {
     %{SOURCE20} $RPM_BUILD_ROOT lib/modules/$KernelVer $(realpath configs/mod-extra.list)
     # Identify modules in the kernel-modules-extras package
     %{SOURCE20} $RPM_BUILD_ROOT lib/modules/$KernelVer %{SOURCE84} internal
-%if 0%{!?fedora:1}
-    # Identify modules in the kernel-modules-partner package
-    %{SOURCE20} $RPM_BUILD_ROOT lib/modules/$KernelVer %{SOURCE85} partner
-%endif
 
     #
     # Generate the kernel-core and kernel-modules files lists
@@ -2111,10 +2083,6 @@ BuildKernel() {
     xargs rm -rf < mod-extra.list
     # don't include anything going int kernel-modules-internal in the file lists
     xargs rm -rf < mod-internal.list
-%if 0%{!?fedora:1}
-    # don't include anything going int kernel-modules-partner in the file lists
-    xargs rm -rf < mod-partner.list
-%endif
 
     if [ $DoModules -eq 1 ]; then
 	# Find all the module files and filter them out into the core and
@@ -2170,9 +2138,6 @@ BuildKernel() {
     sed -e 's/^lib*/\/lib/' %{?zipsed} $RPM_BUILD_ROOT/modules.list >> ../kernel${Variant:+-${Variant}}-core.list
     sed -e 's/^lib*/\/lib/' %{?zipsed} $RPM_BUILD_ROOT/mod-extra.list >> ../kernel${Variant:+-${Variant}}-modules-extra.list
     sed -e 's/^lib*/\/lib/' %{?zipsed} $RPM_BUILD_ROOT/mod-internal.list >> ../kernel${Variant:+-${Variant}}-modules-internal.list
-%if 0%{!?fedora:1}
-    sed -e 's/^lib*/\/lib/' %{?zipsed} $RPM_BUILD_ROOT/mod-partner.list >> ../kernel${Variant:+-${Variant}}-modules-partner.list
-%endif
 
     # Cleanup
     rm -f $RPM_BUILD_ROOT/k-d.list
@@ -2180,9 +2145,6 @@ BuildKernel() {
     rm -f $RPM_BUILD_ROOT/module-dirs.list
     rm -f $RPM_BUILD_ROOT/mod-extra.list
     rm -f $RPM_BUILD_ROOT/mod-internal.list
-%if 0%{!?fedora:1}
-    rm -f $RPM_BUILD_ROOT/mod-partner.list
-%endif
 
 %if %{signmodules}
     if [ $DoModules -eq 1 ]; then
@@ -2415,7 +2377,7 @@ find Documentation -type d | xargs chmod u+w
     fi \
   fi \
   if [ "%{zipmodules}" -eq "1" ]; then \
-    find $RPM_BUILD_ROOT/lib/modules/ -type f -name '*.ko' | xargs -r xz; \
+    find $RPM_BUILD_ROOT/lib/modules/ -type f -name '*.ko' | xargs -P%{zcpu} -r xz; \
   fi \
 %{nil}
 
@@ -2767,19 +2729,6 @@ fi\
 %{nil}
 
 #
-# This macro defines a %%post script for a kernel*-modules-partner package.
-# It also defines a %%postun script that does the same thing.
-#	%%kernel_modules_partner_post [<subpackage>]
-#
-%define kernel_modules_partner_post() \
-%{expand:%%post %{?1:%{1}-}modules-partner}\
-/sbin/depmod -a %{KVERREL}%{?1:+%{1}}\
-%{nil}\
-%{expand:%%postun %{?1:%{1}-}modules-partner}\
-/sbin/depmod -a %{KVERREL}%{?1:+%{1}}\
-%{nil}
-
-#
 # This macro defines a %%post script for a kernel*-modules package.
 # It also defines a %%postun script that does the same thing.
 #	%%kernel_modules_post [<subpackage>]
@@ -2849,9 +2798,6 @@ fi\
 %{expand:%%kernel_modules_post %{?-v*}}\
 %{expand:%%kernel_modules_extra_post %{?-v*}}\
 %{expand:%%kernel_modules_internal_post %{?-v*}}\
-%if 0%{!?fedora:1}\
-%{expand:%%kernel_modules_partner_post %{?-v*}}\
-%endif\
 %{expand:%%kernel_variant_posttrans %{?-v*}}\
 %{expand:%%post %{?-v*:%{-v*}-}core}\
 %{-r:\
@@ -3129,9 +3075,6 @@ fi
 %{expand:%%files -f kernel-%{?3:%{3}-}modules-extra.list %{?3:%{3}-}modules-extra}\
 %config(noreplace) /etc/modprobe.d/*-blacklist.conf\
 %{expand:%%files -f kernel-%{?3:%{3}-}modules-internal.list %{?3:%{3}-}modules-internal}\
-%if 0%{!?fedora:1}\
-%{expand:%%files -f kernel-%{?3:%{3}-}modules-partner.list %{?3:%{3}-}modules-partner}\
-%endif\
 %if %{with_debuginfo}\
 %ifnarch noarch\
 %{expand:%%files -f debuginfo%{?3}.list %{?3:%{3}-}debuginfo}\
