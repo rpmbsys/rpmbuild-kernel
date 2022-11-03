@@ -124,17 +124,17 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specversion 5.19.9
+%define specversion 5.19.17
 %define patchversion 5.19
 %define pkgrelease 100
 %define kversion 5
-%define tarfile_release 5.19.9
+%define tarfile_release 5.19.17
 # This is needed to do merge window version magic
 %define patchlevel 19
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 100%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 5.19.9
+%define kabiversion 5.19.17
 #
 # End of genspec.sh variables
 #
@@ -1047,7 +1047,7 @@ This package provides debug information for package kernel-tools.
 %{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{_bindir}/centrino-decode(\.debug)?|.*%%{_bindir}/powernow-k8-decode(\.debug)?|.*%%{_bindir}/cpupower(\.debug)?|.*%%{_libdir}/libcpupower.*|.*%%{_bindir}/turbostat(\.debug)?|.*%%{_bindir}/x86_energy_perf_policy(\.debug)?|.*%%{_bindir}/tmon(\.debug)?|.*%%{_bindir}/lsgpio(\.debug)?|.*%%{_bindir}/gpio-hammer(\.debug)?|.*%%{_bindir}/gpio-event-mon(\.debug)?|.*%%{_bindir}/gpio-watch(\.debug)?|.*%%{_bindir}/iio_event_monitor(\.debug)?|.*%%{_bindir}/iio_generic_buffer(\.debug)?|.*%%{_bindir}/lsiio(\.debug)?|.*%%{_bindir}/intel-speed-select(\.debug)?|.*%%{_bindir}/page_owner_sort(\.debug)?|.*%%{_bindir}/slabinfo(\.debug)?|.*%%{_sbindir}/intel_sdsi(\.debug)?|XXX' -o kernel-tools-debuginfo.list}
 
 %package -n rtla
-Summary: RTLA: Real-Time Linux Analysis tools 
+Summary: RTLA: Real-Time Linux Analysis tools
 
 %description -n rtla
 The rtla tool is a meta-tool that includes a set of commands that
@@ -3126,6 +3126,57 @@ fi
 #
 #
 %changelog
+* Mon Oct 24 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.19.17-100]
+- Reset release (Justin M. Forbes)
+
+* Mon Oct 24 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.19.17-1]
+- Linux v5.19.17
+
+* Fri Oct 21 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.19.16-1]
+- Bump for build (Justin M. Forbes)
+- drm/vc4: hdmi: Fix HSM clock too low on Pi4 (maxime@cerno.tech)
+
+* Sat Oct 15 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.19.16-0]
+- Reset build for version bump (Justin M. Forbes)
+- Linux v5.19.16
+
+* Thu Oct 13 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.19.15-1]
+- Bump for build (Justin M. Forbes)
+- mctp: prevent double key removal and unref (Jeremy Kerr)
+- wifi: cfg80211: update hidden BSSes to avoid WARN_ON (Johannes Berg)
+- wifi: mac80211: fix crash in beacon protection for P2P-device (Johannes Berg)
+- wifi: mac80211_hwsim: avoid mac80211 warning on bad rate (Johannes Berg)
+- wifi: cfg80211: avoid nontransmitted BSS list corruption (Johannes Berg)
+- wifi: cfg80211: fix BSS refcounting bugs (Johannes Berg)
+- wifi: cfg80211: ensure length byte is present before access (Johannes Berg)
+- wifi: mac80211: fix MBSSID parsing use-after-free (Johannes Berg)
+- wifi: cfg80211/mac80211: reject bad MBSSID elements (Johannes Berg)
+- wifi: cfg80211: fix u8 overflow in cfg80211_update_notlisted_nontrans() (Johannes Berg)
+- drm/vc4: hdmi: Check the HSM rate at runtime_resume (Maxime Ripard)
+- drm/vc4: hdmi: Enforce the minimum rate at runtime_resume (Maxime Ripard)
+- phy: rockchip-inno-usb2: Return zero after otg sync (Peter Geis)
+
+* Wed Oct 12 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.19.15-0]
+- scsi: stex: Properly zero out the passthrough command structure (Linus Torvalds)
+- ipv4: Handle attempt to delete multipath route when fib_info contains an nh reference (David Ahern)
+- Linux v5.19.15
+
+* Wed Oct 05 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.19.14-0]
+- Linux v5.19.14
+
+* Tue Oct 04 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.19.13-0]
+- Linux v5.19.13
+
+* Wed Sep 28 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.19.12-0]
+- Linux v5.19.12
+
+* Fri Sep 23 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.19.11-0]
+- Linux v5.19.11
+
+* Tue Sep 20 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.19.10-0]
+- kbuild: Add skip_encoding_btf_enum64 option to pahole (Martin Rodriguez Reboredo)
+- Linux v5.19.10
+
 * Thu Sep 15 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.19.9-0]
 - Add CONFIG_ARM64_ERRATUM_2457168 as new stable config option (Justin M. Forbes)
 - fedora: disable IWLMEI (Peter Robinson)
