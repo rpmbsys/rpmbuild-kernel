@@ -621,7 +621,9 @@ BuildRequires: python3-devel
 BuildRequires: python-devel
 %endif
 BuildRequires: gcc-plugin-devel
+%if 0%{?rhel} > 7 || 0%{?fedora}
 BuildRequires: kernel-rpm-macros
+%endif
 # glibc-static is required for a consistent build environment (specifically
 # CONFIG_CC_CAN_LINK_STATIC=y).
 BuildRequires: glibc-static

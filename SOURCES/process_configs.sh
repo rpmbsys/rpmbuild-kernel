@@ -7,6 +7,7 @@
 # shellcheck disable=SC2164
 
 test -n "$RHTEST" && exit 0
+test -z "$RHJOBS" && RHJOBS=$(/usr/bin/getconf _NPROCESSORS_ONLN)
 
 usage()
 {
