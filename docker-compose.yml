@@ -12,7 +12,8 @@ services:
       "--without", "selftests",
       "--without", "debuginfo",
       "--without", "kabidwchk",
-      "--without", "kabidw-base"]
+      "--without", "kabidw-base",
+      "--without", "efiuki"]
   centos7kernelonly:
     volumes:
       - rpm7:/home/centos/rpmbuild/RPMS
@@ -32,7 +33,8 @@ services:
       "--without", "bpftool",
       "--without", "gcov",
       "--without", "ipaclones",
-      "--without", "kernel-abi-whitelists"]
+      "--without", "kernel-abi-whitelists",
+      "--without", "efiuki"]
   rocky8build:
     volumes:
       - rpm8rocky:/home/centos/rpmbuild/RPMS
@@ -45,7 +47,8 @@ services:
       "--without", "selftests",
       "--without", "debuginfo",
       "--without", "kabidwchk",
-      "--without", "kabidw-base"]
+      "--without", "kabidw-base",
+      "--without", "efiuki"]
   rocky8kernelonly:
     volumes:
       - rpm8rocky:/home/centos/rpmbuild/RPMS
@@ -65,7 +68,8 @@ services:
       "--without", "bpftool",
       "--without", "gcov",
       "--without", "ipaclones",
-      "--without", "kernel-abi-whitelists"]
+      "--without", "kernel-abi-whitelists",
+      "--without", "efiuki"]
 
 volumes:
   rpm7:
