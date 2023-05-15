@@ -6,7 +6,7 @@ services:
     build:
       context: .
       args:
-        centos: $OS7
+        os: $OS7
     command: ["-ba",
       "--without", "doc",
       "--without", "selftests",
@@ -19,7 +19,7 @@ services:
     build:
       context: .
       args:
-        centos: $OS7
+        os: $OS7
     command: ["-ba",
       "--without", "doc",
       "--without", "selftests",
@@ -33,26 +33,26 @@ services:
       "--without", "gcov",
       "--without", "ipaclones",
       "--without", "kernel-abi-whitelists"]
-  stream8build:
+  rocky8build:
     volumes:
-      - rpm8stream:/home/centos/rpmbuild/RPMS
+      - rpm8rocky:/home/centos/rpmbuild/RPMS
     build:
       context: .
       args:
-        centos: stream8
+        os: $RL8
     command: ["-ba",
       "--without", "doc",
       "--without", "selftests",
       "--without", "debuginfo",
       "--without", "kabidwchk",
       "--without", "kabidw-base"]
-  stream8kernelonly:
+  rocky8kernelonly:
     volumes:
-      - rpm8stream:/home/centos/rpmbuild/RPMS
+      - rpm8rocky:/home/centos/rpmbuild/RPMS
     build:
       context: .
       args:
-        centos: stream8
+        os: $RL8
     command: ["-ba",
       "--without", "doc",
       "--without", "selftests",
@@ -70,5 +70,5 @@ services:
 volumes:
   rpm7:
     name: rpm7
-  rpm8stream:
-    name: rpm8stream
+  rpm8rocky:
+    name: rpm8rocky

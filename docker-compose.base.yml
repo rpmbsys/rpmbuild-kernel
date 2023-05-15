@@ -7,8 +7,10 @@ services:
       args:
         centos: $OS7
     image: "aursu/rpmbuild:${OS7}-base-kernel"
-  stream8base:
+  rocky8base:
     build:
       context: .
-      dockerfile: Dockerfile.stream8-base
-    image: aursu/rpmbuild:stream8-base-kernel
+      dockerfile: Dockerfile.base
+      args:
+        os: $RL8
+    image: "aursu/rpmbuild:${RL8TAG}-base-kernel"
