@@ -9,6 +9,10 @@ COPY SPECS ${BUILD_TOPDIR}/SPECS
 
 RUN chown -R $BUILD_USER ${BUILD_TOPDIR}/{SOURCES,SPECS}
 
+RUN cd ${BUILD_TOPDIR}/SOURCES \
+    && ls -la linux-*.tar.xz \
+    && sha256sum -c linux.tar.xz.sha256
+
 USER $BUILD_USER
 ENTRYPOINT ["/usr/bin/rpmbuild", "kernel.spec"]
 CMD ["-ba"]
