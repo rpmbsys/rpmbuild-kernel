@@ -34,9 +34,10 @@ jobs:
       UPLOADER: ${{ matrix.uploader }}
       REPO_PATH: ${{ matrix.repo_path }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: true
+          lfs: true
       - run: docker-compose -f docker-compose.base.yml build --no-cache --pull $BASE
       - run: docker-compose -f $BUILD_COMPOSE_FILE build --no-cache $BUILD
       - run: docker-compose -f $BUILD_COMPOSE_FILE up --exit-code-from $BUILD $BUILD
