@@ -193,7 +193,7 @@ function commit_new_configs()
 	# assume we are in $source_tree/configs, need to get to top level
 	pushd "$(switch_to_toplevel)" &>/dev/null
 
-	for cfg in "$SCRIPT_DIR/${PACKAGE_NAME}${KVERREL}"*.config
+	for cfg in "$SCRIPT_DIR/${SPECPACKAGE_NAME}${KVERREL}"*.config
 	do
 		arch=$(head -1 "$cfg" | cut -b 3-)
 		cfgtmp="${cfg}.tmp"
@@ -304,7 +304,7 @@ function process_configs()
 	[ -f .mismatches ] && rm -f .mismatches
 
 	count=0
-	for cfg in "$SCRIPT_DIR/${PACKAGE_NAME}${KVERREL}"*.config
+	for cfg in "$SCRIPT_DIR/${SPECPACKAGE_NAME}${KVERREL}"*.config
 	do
 		if [ "$count" -eq 0 ]; then
 			# do the first one by itself so that tools are built
@@ -313,7 +313,7 @@ function process_configs()
 		process_config "$cfg" "$count" &
 		waitpids[${count}]=$!
 		((count++))
-		while [ $(jobs | grep -c Running) -ge $RHJOBS ]; do :; done
+		while [ "$(jobs | grep -c Running)" -ge "$RHJOBS" ]; do :; done
 	done
 	for pid in ${waitpids[*]}; do
 		wait ${pid}
@@ -345,9 +345,6 @@ MAKEOPTS=""
 CC_IS_CLANG=0
 
 RETURNCODE=0
-
-[ -z "$RHJOBS" ] && export RHJOBS=$(/usr/bin/getconf _NPROCESSORS_ONLN)
-[ -z "$RHJOBS" ] && export RHJOBS=1
 
 while [[ $# -gt 0 ]]
 do
@@ -390,15 +387,15 @@ do
 done
 
 KVERREL="$(test -n "$1" && echo "-$1" || echo "")"
-FLAVOR="$(test -n "$2" && echo "-$2" || echo "-ark")"
+FLAVOR="$(test -n "$2" && echo "-$2" || echo "-rhel")"
 # shellcheck disable=SC2015
 SCRIPT=$(readlink -f "$0")
 SCRIPT_DIR=$(dirname "$SCRIPT")
 
-# Config options for RHEL should target the pending-ark directory, not pending-common.
+# Config options for RHEL should target the pending-rhel directory, not pending-common.
 if [ "$FLAVOR" = "-rhel" ]
 then
-	FLAVOR="-ark"
+	FLAVOR="-rhel"
 fi
 
 # to handle this script being a symlink
