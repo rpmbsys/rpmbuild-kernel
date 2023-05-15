@@ -1849,6 +1849,8 @@ BuildKernel() {
         CopyKernel=cp
     fi
 
+    SignImage=$KernelImage
+
     %ifarch x86_64 aarch64
     %pesign -s -i $SignImage -o vmlinuz.tmp -a %{secureboot_ca_0} -c %{secureboot_key_0} -n %{pesign_name_0}
     %pesign -s -i vmlinuz.tmp -o vmlinuz.signed -a %{secureboot_ca_1} -c %{secureboot_key_1} -n %{pesign_name_1}
@@ -2503,8 +2505,12 @@ pushd tools/tracing/rtla
 popd
 %endif
 
+if [ -f $DevelDir/vmlinux.h ]; then
+  RPM_VMLINUX_H=$DevelDir/vmlinux.h
+fi
+
 %global bpftool_make \
-  %{__make} EXTRA_CFLAGS="${RPM_OPT_FLAGS}" EXTRA_LDFLAGS="%{__global_ldflags}" DESTDIR=$RPM_BUILD_ROOT %{?make_opts} V=1
+  %{__make} EXTRA_CFLAGS="${RPM_OPT_FLAGS}" EXTRA_LDFLAGS="%{__global_ldflags}" DESTDIR=$RPM_BUILD_ROOT %{?make_opts} VMLINUX_H="${RPM_VMLINUX_H}" V=1
 %if %{with_bpftool}
 pushd tools/bpf/bpftool
 %{bpftool_make}
@@ -2793,6 +2799,10 @@ rm -f %{buildroot}%{_bindir}/timerlat
 popd
 %endif
 
+if [ -f $DevelDir/vmlinux.h ]; then
+  RPM_VMLINUX_H=$DevelDir/vmlinux.h
+fi
+
 %if %{with_bpftool}
 pushd tools/bpf/bpftool
 %{bpftool_make} prefix=%{_prefix} bash_compdir=%{_sysconfdir}/bash_completion.d/ mandir=%{_mandir} install doc-install
@@ -2874,6 +2884,7 @@ find -type d -exec install -d %{buildroot}%{_libexecdir}/kselftests/netfilter/{}
 find -type f -executable -exec install -D -m755 {} %{buildroot}%{_libexecdir}/kselftests/netfilter/{} \;
 find -type f ! -executable -exec install -D -m644 {} %{buildroot}%{_libexecdir}/kselftests/netfilter/{} \;
 popd
+
 # install memfd selftests
 pushd tools/testing/selftests/memfd
 find -type d -exec install -d %{buildroot}%{_libexecdir}/kselftests/memfd/{} \;
