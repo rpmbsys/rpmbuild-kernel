@@ -3,7 +3,7 @@ ARG os=8.7.20221112
 FROM aursu/rpmbuild:${os}-build
 
 USER root
-RUN yum -y install \
+RUN dnf -y install \
         asciidoc \
         audit-libs-devel \
         bc \
@@ -33,4 +33,4 @@ RUN yum -y install \
         xmlto \
         xz-devel \
         zlib-devel \
-    && yum clean all && rm -rf /var/cache/yum
+    && dnf clean all && rm -rf /var/cache/dnf
