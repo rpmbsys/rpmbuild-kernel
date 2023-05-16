@@ -120,6 +120,10 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
+%if 0%{?rhel} == 7
+%global __python %{__python3}
+%endif
+
 #
 # genspec.sh variables
 #
@@ -655,6 +659,7 @@ BuildRequires: opencsd-devel >= 1.0.0
 %if %{with_tools}
 %if 0%{?rhel} == 7
 BuildRequires: python-docutils
+BuildRequires: python36-docutils
 %else
 BuildRequires: python3-docutils
 %endif
@@ -676,6 +681,7 @@ BuildRequires: openssl-devel
 %if %{with_bpftool}
 %if 0%{?rhel} == 7
 BuildRequires: python-docutils
+BuildRequires: python36-docutils
 %else
 BuildRequires: python3-docutils
 %endif
@@ -828,7 +834,12 @@ Source13: redhatsecureboot003.cer
 # released_kernel
 %endif
 
+%if 0%{?rhel} == 7
+Source20: mod-denylist.el7.sh
+%else
 Source20: mod-denylist.sh
+%endif
+
 Source21: mod-sign.sh
 
 %define modsign_cmd %{SOURCE21}

@@ -33,7 +33,7 @@ RUN sed -i '/metalink=/s/https:/http:/' /etc/yum.repos.d/epel.repo \
         pciutils-devel \
         perl-devel perl-generators "perl(ExtUtils::Embed)" \
         pesign \
-        python3-devel python-devel python-docutils \
+        python3-devel python-devel python36-docutils python-docutils \
         xmlto \
         xz-devel \
         zlib-devel \
