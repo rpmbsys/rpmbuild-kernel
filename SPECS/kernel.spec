@@ -2357,12 +2357,14 @@ BuildKernel() {
     # the F17 UsrMove feature.
     ln -sf $DevelDir $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
 
+%if 0%{?rhel} > 7 || 0%{?fedora}
 %ifnarch armv7hl
     # Generate vmlinux.h and put it to kernel-devel path
     # zfcpdump build does not have btf anymore
     if [ "$Variant" != "zfcpdump" ]; then
         bpftool btf dump file vmlinux format c > $RPM_BUILD_ROOT/$DevelDir/vmlinux.h
     fi
+%endif
 %endif
 
     # prune junk from kernel-devel
