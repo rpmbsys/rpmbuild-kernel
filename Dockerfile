@@ -1,8 +1,8 @@
 ARG os=7.9.2009
 FROM aursu/rpmbuild:${os}-base-kernel
 
-ENV kernel_build=0.rc1.20230510git16a8829130ca.18.fc39
-ENV kernel_source=linux-6.4-rc1-12-g16a8829130ca.tar.xz
+ENV kernel_build=0.rc2.23.fc39
+ENV kernel_source=linux-6.4-rc2.tar.xz
 
 COPY SOURCES ${BUILD_TOPDIR}/SOURCES
 COPY SPECS ${BUILD_TOPDIR}/SPECS

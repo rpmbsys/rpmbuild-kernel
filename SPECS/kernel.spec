@@ -149,13 +149,13 @@ Summary: The Linux kernel
 %define specrpmversion 6.4.0
 %define specversion 6.4.0
 %define patchversion 6.4
-%define pkgrelease 0.rc1.20230510git16a8829130ca.18
+%define pkgrelease 0.rc2.23
 %define kversion 6
-%define tarfile_release 6.4-rc1-12-g16a8829130ca
+%define tarfile_release 6.4-rc2
 # This is needed to do merge window version magic
 %define patchlevel 4
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 0.rc1.20230510git16a8829130ca.18%{?buildid}%{?dist}
+%define specrelease 0.rc2.23%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.4.0
 
@@ -3426,6 +3426,11 @@ fi
 #
 #
 %changelog
+* Mon May 15 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.4.0-0.rc2.23]
+- redhat/configs: Fix incorrect configs location and content (Vladis Dronov)
+- redhat/configs: turn on CONFIG_MARVELL_CN10K_DDR_PMU (Michal Schmidt) [2042241]
+- Linux v6.4.0-0.rc2
+
 * Wed May 10 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.4.0-0.rc1.16a8829130ca.18]
 - Enable IO_URING for RHEL (Justin M. Forbes)
 - Linux v6.4.0-0.rc1.16a8829130ca
