@@ -3,6 +3,8 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
+%global _smp_build_ncpus  %{?_smp_build_ncpus:%{_smp_build_ncpus}}%{!?_smp_build_ncpus:%(/usr/bin/getconf _NPROCESSORS_ONLN)}
+
 # Disable frame pointers
 %undefine _include_frame_pointers
 
@@ -1506,6 +1508,8 @@ Prebuilt default unified kernel image for virtual machines.
 %endif
 
 %prep
+RPM_BUILD_NCPUS=${RPM_BUILD_NCPUS:-%_smp_build_ncpus}
+
 # do a few sanity-checks for --with *only builds
 %if %{with_baseonly}
 %if !%{with_up}
@@ -1711,6 +1715,7 @@ cd ..
 ### build
 ###
 %build
+RPM_BUILD_NCPUS=${RPM_BUILD_NCPUS:-%_smp_build_ncpus}
 
 rm -rf %{buildroot_unstripped} || true
 mkdir -p %{buildroot_unstripped}
@@ -2658,6 +2663,7 @@ find Documentation -type d | xargs chmod u+w
 ###
 
 %install
+RPM_BUILD_NCPUS=${RPM_BUILD_NCPUS:-%_smp_build_ncpus}
 
 cd linux-%{KVERREL}
 
