@@ -37,7 +37,6 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: true
-          lfs: true
       - run: docker-compose -f docker-compose.base.yml build --no-cache --pull $BASE
       - run: docker-compose -f $BUILD_COMPOSE_FILE build --no-cache $BUILD
       - run: docker-compose -f $BUILD_COMPOSE_FILE up --exit-code-from $BUILD $BUILD

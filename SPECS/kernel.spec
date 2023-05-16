@@ -2361,7 +2361,7 @@ BuildKernel() {
 %ifnarch armv7hl
     # Generate vmlinux.h and put it to kernel-devel path
     # zfcpdump build does not have btf anymore
-    if [ "$Variant" != "zfcpdump" ]; then
+    if [ "$Variant" != "zfcpdump" -a -f vmlinux ]; then
         bpftool btf dump file vmlinux format c > $RPM_BUILD_ROOT/$DevelDir/vmlinux.h
     fi
 %endif
