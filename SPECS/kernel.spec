@@ -3400,7 +3400,7 @@ fi
 /%{image_install_path}/dtb-%{KVERREL}%{?3:+%{3}} \
 %endif\
 %attr(600, root, root) /boot/System.map-%{KVERREL}%{?3:+%{3}}\
-/boot/symvers-%{KVERREL}%{?3:+%{3}}.gz\
+/boot/symvers-%{KVERREL}%{?3:+%{3}}.%compext\
 /boot/config-%{KVERREL}%{?3:+%{3}}\
 %ghost %attr(0600, -, -) /boot/initramfs-%{KVERREL}%{?3:+%{3}}.img\
 %endif\
