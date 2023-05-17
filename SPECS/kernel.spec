@@ -110,8 +110,13 @@ Summary: The Linux kernel
 %endif
 
 # Default compression algorithm
+%if 0%{?rhel} == 7
+%global compression gzip
+%global compext gz
+%else
 %global compression xz
 %global compext xz
+%endif
 %if %{zipmodules}
 %global zipsed -e 's/\.ko$/\.ko.%compext/'
 %endif
@@ -619,6 +624,9 @@ Requires: fileutils, module-init-tools >= 3.16-2, initscripts >= 8.11.1-1, grubb
 #
 BuildRequires: kmod, bash, coreutils, tar, git-core, which
 BuildRequires: bzip2, xz, findutils, m4, perl-interpreter, perl-Carp, perl-devel, perl-generators, make, diffutils, gawk
+%if 0%{?rhel} == 7
+BuildRequires: gzip
+%endif
 BuildRequires: gcc, binutils, redhat-rpm-config, hmaccalc, bison, flex, gcc-c++
 BuildRequires: net-tools, hostname, bc, elfutils-devel
 BuildRequires: dwarves
@@ -1865,7 +1873,14 @@ BuildKernel() {
         CopyKernel=cp
     fi
 
-    SignImage=$KernelImage
+    # Sign the image if we're using EFI
+    # aarch64 kernels are gziped EFI images
+    KernelExtension=${KernelImage##*.}
+    if [ "$KernelExtension" == "gz" ]; then
+        SignImage=${KernelImage%.*}
+    else
+        SignImage=$KernelImage
+    fi
 
     %ifarch x86_64 aarch64
     %pesign -s -i $SignImage -o vmlinuz.tmp -a %{secureboot_ca_0} -c %{secureboot_key_0} -n %{pesign_name_0}
@@ -1888,6 +1903,9 @@ BuildKernel() {
         exit 1
     fi
     mv vmlinuz.signed $SignImage
+    if [ "$KernelExtension" == "gz" ]; then
+        gzip -f9 $SignImage
+    fi
     # signkernel
     %endif
 
