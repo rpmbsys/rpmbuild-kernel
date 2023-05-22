@@ -1,5 +1,5 @@
 ARG os=8.7.20221112
-FROM aursu/rpmbuild:${centos}-build-systemd
+FROM aursu/rpmbuild:${os}-build-systemd
 
 RUN dnf -y install \
         grub2 \
