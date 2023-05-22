@@ -6,8 +6,23 @@ services:
       - rpm7:/home/centos/rpmbuild/RPMS
     build:
       context: .
+      dockerfile: Dockerfile.EL7
       args:
         centos: $OS7
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp=unconfined
+    tmpfs:
+      - /run
+  rocky8kerneltest:
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - rpm8rocky:/home/centos/rpmbuild/RPMS
+    build:
+      context: .
+      args:
+        os: $RL8
     cap_add:
       - SYS_ADMIN
     security_opt:
@@ -18,3 +33,5 @@ services:
 volumes:
   rpm7:
     name: rpm7
+  rpm8rocky:
+    name: rpm8rocky
