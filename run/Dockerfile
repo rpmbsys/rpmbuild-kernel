@@ -1,6 +1,7 @@
 ARG os=8.7.20221112
 FROM aursu/rpmbuild:${os}-build-systemd
 
+USER root
 RUN dnf -y install \
         grub2 \
         grubby \
