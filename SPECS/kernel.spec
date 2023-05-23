@@ -110,7 +110,8 @@ Summary: The Linux kernel
 %endif
 
 # Default compression algorithm
-%if 0%{?rhel} == 7
+# CentOS 7 and 8 both force to use gz for symver file
+%if 0%{?rhel} <= 8
 %global compression gzip
 %global compext gz
 %else
