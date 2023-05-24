@@ -3407,11 +3407,8 @@ fi
 /lib/modules/%{KVERREL}%{?3:+%{3}}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-virt.efi\
 %ghost /%{image_install_path}/efi/EFI/Linux/%{?-k:%{-k*}}%{!?-k:*}-%{KVERREL}%{?3:+%{3}}.efi\
 %endif\
-%if %{?3:1} %{!?3:0}\
-%{expand:%%files %{3}}\
-%else\
+%{expand:%%files %{?3}}\
 %if 0%{?rhel} == 7\
-%{expand:%%files}\
 /%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?3:+%{3}}\
 /%{image_install_path}/.vmlinuz-%{KVERREL}%{?3:+%{3}}.hmac \
 %ifarch %{arm} aarch64\
@@ -3421,7 +3418,6 @@ fi
 /boot/symvers-%{KVERREL}%{?3:+%{3}}.%compext\
 /boot/config-%{KVERREL}%{?3:+%{3}}\
 %ghost %attr(0600, -, -) /boot/initramfs-%{KVERREL}%{?3:+%{3}}.img\
-%endif\
 %endif\
 %if %{with_gcov}\
 %ifnarch %nobuildarches noarch\
