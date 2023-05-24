@@ -161,13 +161,13 @@ Summary: The Linux kernel
 %define specrpmversion 6.4.0
 %define specversion 6.4.0
 %define patchversion 6.4
-%define pkgrelease 0.rc2.23
+%define pkgrelease 0.rc3.20230523gitae8373a5add4.29
 %define kversion 6
-%define tarfile_release 6.4-rc2
+%define tarfile_release 6.4-rc3-8-gae8373a5add4
 # This is needed to do merge window version magic
 %define patchlevel 4
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 0.rc2.23%{?buildid}%{?dist}
+%define specrelease 0.rc3.20230523gitae8373a5add4.29%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.4.0
 
@@ -2597,7 +2597,7 @@ for dir in bpf bpf/no_alu32 bpf/progs; do
 		-name '*.o' -exec sh -c 'readelf -h "{}" | grep -q "^  Machine:.*BPF"' \; \) -print0 | \
 	xargs -0 cp -t %{buildroot}%{_libexecdir}/kselftests/$dir || true
 done
-%buildroot_save_unstripped "usr/libexec/kselftests/bpf/test_progs"
+%buildroot_save_unstripped "usr/libexec/kselftests/bpf/test_progs-no_alu32"
 popd
 export -n BPFTOOL
 %endif
@@ -3405,6 +3405,10 @@ fi
 %endif\
 %if %{with_efiuki}\
 %{expand:%%files %{?3:%{3}-}uki-virt}\
+%attr(0600, root, root) /lib/modules/%{KVERREL}%{?3:+%{3}}/System.map\
+/lib/modules/%{KVERREL}%{?3:+%{3}}/symvers.%compext\
+/lib/modules/%{KVERREL}%{?3:+%{3}}/config\
+/lib/modules/%{KVERREL}%{?3:+%{3}}/modules.builtin*\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-virt.efi\
 %ghost /%{image_install_path}/efi/EFI/Linux/%{?-k:%{-k*}}%{!?-k:*}-%{KVERREL}%{?3:+%{3}}.efi\
 %endif\
@@ -3460,6 +3464,34 @@ fi
 #
 #
 %changelog
+* Tue May 23 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.4.0-0.rc3.ae8373a5add4.29]
+- Turn off DEBUG_VM for non debug Fedora kernels (Justin M. Forbes)
+- Linux v6.4.0-0.rc3.ae8373a5add4
+
+* Mon May 22 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.4.0-0.rc3.28]
+- Enable CONFIG_BT on aarch64 (Charles Mirabile)
+- Linux v6.4.0-0.rc3
+
+* Sun May 21 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.4.0-0.rc2.0dd2a6fb1e34.27]
+- Linux v6.4.0-0.rc2.0dd2a6fb1e34
+
+* Sat May 20 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.4.0-0.rc2.d3f704310cc7.26]
+- Linux v6.4.0-0.rc2.d3f704310cc7
+
+* Fri May 19 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.4.0-0.rc2.2d1bcbc6cd70.25]
+- redhat/configs: turn on CONFIG_MARVELL_CN10K_TAD_PMU (Michal Schmidt) [2042240]
+- redhat/configs: Fix enabling MANA Infiniband (Kamal Heib)
+- Fix file listing for symvers in uki (Justin M. Forbes)
+- Fix up some Fedora config items (Justin M. Forbes)
+- enable efifb for Nvidia (Justin M. Forbes)
+- Linux v6.4.0-0.rc2.2d1bcbc6cd70
+
+* Thu May 18 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.4.0-0.rc2.4d6d4c7f541d.24]
+- kernel.spec: package unstripped test_progs-no_alu32 (Felix Maurer)
+- Turn on NFT_CONNLIMIT for Fedora (Justin M. Forbes)
+- Include the information about builtin symbols into kernel-uki-virt package too (Vitaly Kuznetsov)
+- Linux v6.4.0-0.rc2.4d6d4c7f541d
+
 * Mon May 15 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.4.0-0.rc2.23]
 - redhat/configs: Fix incorrect configs location and content (Vladis Dronov)
 - redhat/configs: turn on CONFIG_MARVELL_CN10K_DDR_PMU (Michal Schmidt) [2042241]

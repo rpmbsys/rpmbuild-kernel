@@ -1,15 +1,15 @@
 ARG os=7.9.2009
 FROM aursu/rpmbuild:${os}-base-kernel
 
-ENV kernel_build=0.rc2.23.fc39
-ENV kernel_source=linux-6.4-rc2.tar.xz
+ENV kernel_build=0.rc3.20230523gitae8373a5add4.29.fc39
+ENV kernel_source=linux-6.4-rc3-8-gae8373a5add4.tar.xz
 
 COPY SOURCES ${BUILD_TOPDIR}/SOURCES
 COPY SPECS ${BUILD_TOPDIR}/SPECS
 
 RUN cd ${BUILD_TOPDIR} \
     && mkdir -p kernel-6.4.0-${kernel_build} && cd kernel-6.4.0-${kernel_build} \
-    && curl -O https://kojipkgs.fedoraproject.org//packages/kernel/6.4.0/${kernel_build}/src/kernel-6.4.0-${kernel_build}.src.rpm \
+    && curl -O https://kojipkgs.fedoraproject.org/packages/kernel/6.4.0/${kernel_build}/src/kernel-6.4.0-${kernel_build}.src.rpm \
     && rpm2cpio kernel-6.4.0-${kernel_build}.src.rpm | cpio -idmv \
     && mv ${kernel_source} ${BUILD_TOPDIR}/SOURCES \
     && rm -rf ${BUILD_TOPDIR}/kernel-6.4.0-${kernel_build} \
