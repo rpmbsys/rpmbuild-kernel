@@ -161,13 +161,13 @@ Summary: The Linux kernel
 %define specrpmversion 6.4.0
 %define specversion 6.4.0
 %define patchversion 6.4
-%define pkgrelease 0.rc4.20230529gite338142b39cf.35
+%define pkgrelease 0.rc5.20230606gitf8dba31b0a82.42
 %define kversion 6
-%define tarfile_release 6.4-rc4-13-ge338142b39cf
+%define tarfile_release 6.4-rc5-2-gf8dba31b0a82
 # This is needed to do merge window version magic
 %define patchlevel 4
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 0.rc4.20230529gite338142b39cf.35%{?buildid}%{?dist}
+%define specrelease 0.rc5.20230606gitf8dba31b0a82.42%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.4.0
 
@@ -1160,6 +1160,17 @@ aims to analyze the real-time properties of Linux. But, instead of
 testing Linux as a black box, rtla leverages kernel tracing
 capabilities to provide precise information about the properties
 and root causes of unexpected results.
+
+%package -n rv
+Summary: RV: Runtime Verification
+License: GPLv2
+%description -n rv
+Runtime Verification (RV) is a lightweight (yet rigorous) method that
+complements classical exhaustive verification techniques (such as model
+checking and theorem proving) with a more practical approach for
+complex systems.
+The rv tool is the interface for a collection of monitors that aim
+analysing the logical and timing behavior of Linux.
 
 # with_tools
 %endif
@@ -2537,6 +2548,9 @@ popd
 pushd tools/mm/
 %{tools_make} slabinfo page_owner_sort
 popd
+pushd tools/verification/rv/
+%{tools_make}
+popd
 pushd tools/tracing/rtla
 %{tools_make}
 popd
@@ -2822,6 +2836,9 @@ popd
 pushd tools/mm/
 install -m755 slabinfo %{buildroot}%{_bindir}/slabinfo
 install -m755 page_owner_sort %{buildroot}%{_bindir}/page_owner_sort
+popd
+pushd tools/verification/rv/
+%{tools_make} DESTDIR=%{buildroot} install
 popd
 pushd tools/tracing/rtla/
 %{tools_make} DESTDIR=%{buildroot} install
@@ -3296,6 +3313,14 @@ fi
 %{_mandir}/man1/rtla-timerlat.1.gz
 %{_mandir}/man1/rtla.1.gz
 
+%files -n rv
+%{_bindir}/rv
+%{_mandir}/man1/rv-list.1.gz
+%{_mandir}/man1/rv-mon-wip.1.gz
+%{_mandir}/man1/rv-mon-wwnr.1.gz
+%{_mandir}/man1/rv-mon.1.gz
+%{_mandir}/man1/rv.1.gz
+
 # with_tools
 %endif
 
@@ -3464,6 +3489,34 @@ fi
 #
 #
 %changelog
+* Tue Jun 06 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.4.0-0.rc5.f8dba31b0a82.42]
+- Linux v6.4.0-0.rc5.f8dba31b0a82
+
+* Mon Jun 05 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.4.0-0.rc5.41]
+- Add rv subpackage for kernel-tools (John Kacur) [2188441]
+- redhat/configs: NXP i.MX9 family (Steve Best)
+- Linux v6.4.0-0.rc5
+
+* Sun Jun 04 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.4.0-0.rc4.e5282a7d8f6b.40]
+- Linux v6.4.0-0.rc4.e5282a7d8f6b
+
+* Sat Jun 03 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.4.0-0.rc4.9e87b63ed37e.39]
+- redhat/genlog.py: add support to list/process zstream Jira tickets (Herton R. Krzesinski)
+- redhat: fix duplicate jira issues in the resolves line (Herton R. Krzesinski)
+- redhat: add support for Jira issues in changelog (Herton R. Krzesinski)
+- Linux v6.4.0-0.rc4.9e87b63ed37e
+
+* Thu Jun 01 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.4.0-0.rc4.929ed21dfdb6.38]
+- redhat/configs: turn on IMX8ULP CCM Clock Driver (Steve Best)
+- redhat: update filter-modules fsdrvs list to reference smb instead of cifs (Patrick Talbert)
+- Linux v6.4.0-0.rc4.929ed21dfdb6
+
+* Wed May 31 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.4.0-0.rc4.48b1320a674e.37]
+- Linux v6.4.0-0.rc4.48b1320a674e
+
+* Tue May 30 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.4.0-0.rc4.8b817fded42d.36]
+- Linux v6.4.0-0.rc4.8b817fded42d
+
 * Mon May 29 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.4.0-0.rc4.e338142b39cf.35]
 - Linux v6.4.0-0.rc4.e338142b39cf
 
