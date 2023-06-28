@@ -3,7 +3,7 @@
  Kconfig.redhat                                     |  17 +
  Makefile                                           |  20 +-
  arch/arm/Kconfig                                   |   4 +-
- arch/arm64/Kconfig                                 |   4 +-
+ arch/arm64/Kconfig                                 |   2 +-
  arch/s390/include/asm/ipl.h                        |   1 +
  arch/s390/kernel/ipl.c                             |   5 +
  arch/s390/kernel/setup.c                           |   4 +
@@ -61,7 +61,8 @@
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |   1 +
  security/security.c                                |  12 +
- 63 files changed, 1543 insertions(+), 189 deletions(-)
+ tools/bpf/resolve_btfids/Makefile                  |   4 +-
+ 64 files changed, 1544 insertions(+), 190 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index 9e5bab29685f..223901a42a15 100644
@@ -117,7 +118,7 @@ index 000000000000..effb81d04bfd
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 09866a85bc2a..f2a166968dbe 100644
+index e51e4d9174ab..e58f04ca4249 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -22,6 +22,18 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
@@ -171,7 +172,7 @@ index 0fb4b218f665..402f3309a90c 100644
  	  The VM uses one page of physical memory for each page table.
  	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index b1201d25a8a4..7de342835693 100644
+index 343e1e1cae10..163545217df2 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
 @@ -1268,7 +1268,7 @@ endchoice
@@ -183,15 +184,6 @@ index b1201d25a8a4..7de342835693 100644
  	help
  	  For systems with 52-bit userspace VAs enabled, the kernel will attempt
  	  to maintain compatibility with older software by providing 48-bit VAs
-@@ -1516,7 +1516,7 @@ config XEN
- # 16K |       27          |      14      |       13        |         11         |
- # 64K |       29          |      16      |       13        |         13         |
- config ARCH_FORCE_MAX_ORDER
--	int "Order of maximal physically contiguous allocations" if EXPERT && (ARM64_4K_PAGES || ARM64_16K_PAGES)
-+	int "Order of maximal physically contiguous allocations" if ARM64_4K_PAGES || ARM64_16K_PAGES
- 	default "13" if ARM64_64K_PAGES
- 	default "11" if ARM64_16K_PAGES
- 	default "10"
 diff --git a/arch/s390/include/asm/ipl.h b/arch/s390/include/asm/ipl.h
 index b0d00032479d..afb9544fb007 100644
 --- a/arch/s390/include/asm/ipl.h
@@ -550,7 +542,7 @@ index b51f2a4c821e..be31d32aba53 100644
  obj-$(CONFIG_EFI_RCI2_TABLE)		+= rci2-table.o
  obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
 diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index abeff7dc0b58..6384796e76dd 100644
+index 34b9e7876538..97bc2138bf74 100644
 --- a/drivers/firmware/efi/efi.c
 +++ b/drivers/firmware/efi/efi.c
 @@ -32,6 +32,7 @@
@@ -561,7 +553,7 @@ index abeff7dc0b58..6384796e76dd 100644
 
  #include <asm/early_ioremap.h>
 
-@@ -947,40 +948,101 @@ int efi_mem_type(unsigned long phys_addr)
+@@ -926,40 +927,101 @@ int efi_mem_type(unsigned long phys_addr)
  }
  #endif
 
@@ -1485,10 +1477,10 @@ index c525867760bf..549083cdf0ec 100644
   * Intersil/Techwell TW686[4589]-based video capture cards have an empty (zero)
   * class code.  Fix it.
 diff --git a/drivers/scsi/aacraid/linit.c b/drivers/scsi/aacraid/linit.c
-index 68f4dbcfff49..90a6070a1332 100644
+index c4a36c0be527..6ca4061cd164 100644
 --- a/drivers/scsi/aacraid/linit.c
 +++ b/drivers/scsi/aacraid/linit.c
-@@ -77,6 +77,7 @@ char aac_driver_version[] = AAC_DRIVER_FULL_VERSION;
+@@ -78,6 +78,7 @@ char aac_driver_version[] = AAC_DRIVER_FULL_VERSION;
   * Note: The last field is used to index into aac_drivers below.
   */
  static const struct pci_device_id aac_pci_tbl[] = {
@@ -1496,7 +1488,7 @@ index 68f4dbcfff49..90a6070a1332 100644
  	{ 0x1028, 0x0001, 0x1028, 0x0001, 0, 0, 0 }, /* PERC 2/Si (Iguana/PERC2Si) */
  	{ 0x1028, 0x0002, 0x1028, 0x0002, 0, 0, 1 }, /* PERC 3/Di (Opal/PERC3Di) */
  	{ 0x1028, 0x0003, 0x1028, 0x0003, 0, 0, 2 }, /* PERC 3/Si (SlimFast/PERC3Si */
-@@ -144,6 +145,7 @@ static const struct pci_device_id aac_pci_tbl[] = {
+@@ -145,6 +146,7 @@ static const struct pci_device_id aac_pci_tbl[] = {
  	{ 0x9005, 0x0285, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 59 }, /* Adaptec Catch All */
  	{ 0x9005, 0x0286, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 60 }, /* Adaptec Rocket Catch All */
  	{ 0x9005, 0x0288, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 61 }, /* Adaptec NEMER/ARK Catch All */
@@ -2518,7 +2510,7 @@ index b69c95315480..6296043efe36 100644
  obj-$(CONFIG_MULTIUSER) += groups.o
  obj-$(CONFIG_VHOST_TASK) += vhost_task.o
 diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
-index 14f39c1e573e..d221300ae815 100644
+index f1c8733f76b8..e8260e8c8aa1 100644
 --- a/kernel/bpf/syscall.c
 +++ b/kernel/bpf/syscall.c
 @@ -26,6 +26,7 @@
@@ -2553,7 +2545,7 @@ index 14f39c1e573e..d221300ae815 100644
  int sysctl_unprivileged_bpf_disabled __read_mostly =
  	IS_BUILTIN(CONFIG_BPF_UNPRIV_DEFAULT_OFF) ? 2 : 0;
 
-@@ -5377,6 +5395,11 @@ static int bpf_unpriv_handler(struct ctl_table *table, int write,
+@@ -5391,6 +5409,11 @@ static int bpf_unpriv_handler(struct ctl_table *table, int write,
  	if (write && !ret) {
  		if (locked_state && unpriv_enable != 1)
  			return -EPERM;
@@ -2634,7 +2626,7 @@ index 886d2ebd0a0d..d3d1fbbfaa93 100644
  /**
 diff --git a/kernel/rh_messages.c b/kernel/rh_messages.c
 new file mode 100644
-index 000000000000..c55fb108c6bb
+index 000000000000..018800f35ff2
 --- /dev/null
 +++ b/kernel/rh_messages.c
 @@ -0,0 +1,209 @@
@@ -2833,7 +2825,7 @@ index 000000000000..c55fb108c6bb
 +	if (msg)
 +		str = msg;
 +#ifdef CONFIG_MODULES
-+	else if (mod && mod->name)
++	else if (mod)
 +		str = mod->name;
 +#endif
 +
@@ -2848,7 +2840,7 @@ index 000000000000..c55fb108c6bb
 +}
 +EXPORT_SYMBOL(mark_partner_supported);
 diff --git a/scripts/mod/modpost.c b/scripts/mod/modpost.c
-index d4531d09984d..071964717c3b 100644
+index c12150f96b88..3f28b300ae22 100644
 --- a/scripts/mod/modpost.c
 +++ b/scripts/mod/modpost.c
 @@ -23,6 +23,7 @@
@@ -2859,7 +2851,7 @@ index d4531d09984d..071964717c3b 100644
 
  /* Are we using CONFIG_MODVERSIONS? */
  static bool modversions;
-@@ -2132,6 +2133,12 @@ static void write_buf(struct buffer *b, const char *fname)
+@@ -2137,6 +2138,12 @@ static void write_buf(struct buffer *b, const char *fname)
  	}
  }
 
@@ -2872,7 +2864,7 @@ index d4531d09984d..071964717c3b 100644
  static void write_if_changed(struct buffer *b, const char *fname)
  {
  	char *tmp;
-@@ -2195,6 +2202,7 @@ static void write_mod_c_file(struct module *mod)
+@@ -2200,6 +2207,7 @@ static void write_mod_c_file(struct module *mod)
  	add_depends(&buf, mod);
  	add_moddevtable(&buf, mod);
  	add_srcversion(&buf, mod);
@@ -2976,3 +2968,25 @@ index d5ff7ff45b77..ac7d177a5fea 100644
  #ifdef CONFIG_PERF_EVENTS
  /**
   * security_perf_event_open() - Check if a perf event open is allowed
+diff --git a/tools/bpf/resolve_btfids/Makefile b/tools/bpf/resolve_btfids/Makefile
+index ac548a7baa73..4b8079f294f6 100644
+--- a/tools/bpf/resolve_btfids/Makefile
++++ b/tools/bpf/resolve_btfids/Makefile
+@@ -67,7 +67,7 @@ $(BPFOBJ): $(wildcard $(LIBBPF_SRC)/*.[ch] $(LIBBPF_SRC)/Makefile) | $(LIBBPF_OU
+ LIBELF_FLAGS := $(shell $(HOSTPKG_CONFIG) libelf --cflags 2>/dev/null)
+ LIBELF_LIBS  := $(shell $(HOSTPKG_CONFIG) libelf --libs 2>/dev/null || echo -lelf)
+
+-HOSTCFLAGS += -g \
++HOSTCFLAGS_resolve_btfids += -g \
+           -I$(srctree)/tools/include \
+           -I$(srctree)/tools/include/uapi \
+           -I$(LIBBPF_INCLUDE) \
+@@ -76,7 +76,7 @@ HOSTCFLAGS += -g \
+
+ LIBS = $(LIBELF_LIBS) -lz
+
+-export srctree OUTPUT HOSTCFLAGS Q HOSTCC HOSTLD HOSTAR
++export srctree OUTPUT HOSTCFLAGS_resolve_btfids Q HOSTCC HOSTLD HOSTAR
+ include $(srctree)/tools/build/Makefile.include
+
+ $(BINARY_IN): fixdep FORCE prepare | $(OUTPUT)

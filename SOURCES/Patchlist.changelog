@@ -1,3 +1,9 @@
+"https://gitlab.com/cki-project/kernel-ark/-/commit"/31b524ea69e17121c193a63739c513cdcec00deb
+ 31b524ea69e17121c193a63739c513cdcec00deb kernel/rh_messages.c: Another gcc12 warning on redundant NULL test
+
+"https://gitlab.com/cki-project/kernel-ark/-/commit"/aee04731d0904833c3cfaded90144103c7001407
+ aee04731d0904833c3cfaded90144103c7001407 tools/resolve_btfids: Fix setting HOSTCFLAGS
+
 "https://gitlab.com/cki-project/kernel-ark/-/commit"/a880b0fb1a4b0e1526d80c3dc4555eb09d688d46
  a880b0fb1a4b0e1526d80c3dc4555eb09d688d46 Enable IO_URING for RHEL
 
