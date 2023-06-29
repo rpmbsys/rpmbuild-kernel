@@ -31,6 +31,7 @@ rocky8base:
 
 centos7kernelonly:
   stage: build
+  timeout: 3h
   variables:
     BUILD: centos7kernelonly
   script:
@@ -39,6 +40,7 @@ centos7kernelonly:
 
 rocky8kernelonly:
   stage: build
+  timeout: 3h
   variables:
     BUILD: rocky8kernelonly
   script:
