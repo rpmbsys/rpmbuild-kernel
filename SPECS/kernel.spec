@@ -3626,13 +3626,6 @@ fi\
 %{_libexecdir}/kselftests
 %endif
 
-# empty meta-package
-%if %{with_up_base}
-%ifnarch %nobuildarches noarch
-%files
-%endif
-%endif
-
 # This is %%{image_install_path} on an arch where that includes ELF files,
 # or empty otherwise.
 %define elf_image_install_path %{?kernel_image_elf:%{image_install_path}}
