@@ -2,7 +2,8 @@ image: aursu/rpmbuild:7.9.2009-docker
 
 stages:
   - base
-  - build
+  - build1
+  - build2
   - deploy
 
 variables:
@@ -30,22 +31,24 @@ rocky8base:
     - docker-compose -f docker-compose.base.yml build --no-cache --pull $BASE
 
 centos7kernelonly:
-  stage: build
+  stage: build1
   timeout: 3h
   variables:
     BUILD: centos7kernelonly
   script:
     - docker-compose build --no-cache $BUILD
     - docker-compose run -v $CI_COMMIT_SHORT_SHA:/home/centos/rpmbuild/RPMS $BUILD
+    - docker-compose rm -f -v
 
 rocky8kernelonly:
-  stage: build
+  stage: build2
   timeout: 3h
   variables:
     BUILD: rocky8kernelonly
   script:
     - docker-compose build --no-cache $BUILD
     - docker-compose run -v $CI_COMMIT_SHORT_SHA_RL8:/home/centos/rpmbuild/RPMS $BUILD
+    - docker-compose rm -f -v
 
 centos7deploy:
   stage: deploy
