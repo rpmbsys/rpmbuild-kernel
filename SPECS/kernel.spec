@@ -174,7 +174,7 @@ Summary: The Linux kernel
 #  kernel release. (This includes prepatch or "rc" releases.)
 # Set released_kernel to 0 when the upstream source tarball contains an
 #  unreleased kernel development snapshot.
-%global released_kernel 0
+%global released_kernel 1
 # Set debugbuildsenabled to 1 to build separate base and debug kernels
 #  (on supported architectures). The kernel-debug-* subpackages will
 #  contain the debug kernel.
@@ -183,18 +183,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 6.4.0
-%define specversion 6.4.0
+%define specrpmversion 6.4.2
+%define specversion 6.4.2
 %define patchversion 6.4
-%define pkgrelease 59
+%define pkgrelease 200
 %define kversion 6
-%define tarfile_release 6.4
+%define tarfile_release 6.4.2
 # This is needed to do merge window version magic
 %define patchlevel 4
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 59%{?buildid}%{?dist}
+%define specrelease 200%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.4.0
+%define kabiversion 6.4.2
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -3777,6 +3777,18 @@ fi\
 #
 #
 %changelog
+* Wed Jul 05 2023 Justin M. Forbes <jforbes@fedoraproject.org> [6.4.2-200]
+- Fix missing rhel config (Justin M. Forbes)
+
+* Wed Jul 05 2023 Justin M. Forbes <jforbes@fedoraproject.org> [6.4.2-0]
+- Linux v6.4.2
+
+* Wed Jul 05 2023 Justin M. Forbes <jforbes@fedoraproject.org> [6.4.1-0]
+- drivers/firmware: skip simpledrm if nvidia-drm.modeset=1 is set (Javier Martinez Canillas)
+- Turn E1000 back on (Justin M. Forbes)
+- Set up variables and scripts for Fedora stable (Justin M. Forbes)
+- Linux v6.4.1
+
 * Mon Jun 26 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.4.0-59]
 - redhat/kernel.spec.template: Disable 'extracting debug info' messages (Prarit Bhargava)
 - kernel/rh_messages.c: Another gcc12 warning on redundant NULL test (Florian Weimer) [2216678]
