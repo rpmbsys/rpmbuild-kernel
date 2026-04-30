@@ -1,40 +1,4 @@
-version: "3"
 services:
-  centos7build:
-    volumes:
-      - rpm7:/home/centos/rpmbuild/RPMS
-    build:
-      context: .
-      args:
-        os: $OS7
-    command: ["-ba",
-      "--without", "doc",
-      "--without", "selftests",
-      "--without", "debuginfo",
-      "--without", "kabidwchk",
-      "--without", "kabidw-base",
-      "--without", "efiuki"]
-  centos7kernelonly:
-    volumes:
-      - rpm7:/home/centos/rpmbuild/RPMS
-    build:
-      context: .
-      args:
-        os: $OS7
-    command: ["-ba",
-      "--without", "doc",
-      "--without", "selftests",
-      "--without", "debuginfo",
-      "--without", "kabidwchk",
-      "--without", "kabidw-base",
-      "--with",    "baseonly",
-      "--without", "perf",
-      "--without", "tools",
-      "--without", "bpftool",
-      "--without", "gcov",
-      "--without", "ipaclones",
-      "--without", "kernel-abi-whitelists",
-      "--without", "efiuki"]
   rocky8build:
     volumes:
       - rpm8rocky:/home/centos/rpmbuild/RPMS
@@ -70,9 +34,44 @@ services:
       "--without", "ipaclones",
       "--without", "kernel-abi-whitelists",
       "--without", "efiuki"]
+  rocky9build:
+    volumes:
+      - rpm9rocky:/home/centos/rpmbuild/RPMS
+    build:
+      context: .
+      args:
+        os: $RL9
+    command: ["-ba",
+      "--without", "doc",
+      "--without", "selftests",
+      "--without", "debuginfo",
+      "--without", "kabidwchk",
+      "--without", "kabidw-base",
+      "--without", "efiuki"]
+  rocky9kernelonly:
+    volumes:
+      - rpm9rocky:/home/centos/rpmbuild/RPMS
+    build:
+      context: .
+      args:
+        os: $RL9
+    command: ["-ba",
+      "--without", "doc",
+      "--without", "selftests",
+      "--without", "debuginfo",
+      "--without", "kabidwchk",
+      "--without", "kabidw-base",
+      "--with",    "baseonly",
+      "--without", "perf",
+      "--without", "tools",
+      "--without", "bpftool",
+      "--without", "gcov",
+      "--without", "ipaclones",
+      "--without", "kernel-abi-whitelists",
+      "--without", "efiuki"]
 
 volumes:
-  rpm7:
-    name: rpm7
   rpm8rocky:
     name: rpm8rocky
+  rpm9rocky:
+    name: rpm9rocky

@@ -1,4 +1,4 @@
-ARG os=8.7.20221112
+ARG os=9.7.20251123
 FROM aursu/rpmbuild:${os}-build-systemd
 
 USER root

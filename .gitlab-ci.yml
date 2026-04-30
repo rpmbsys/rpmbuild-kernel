@@ -7,59 +7,34 @@ stages:
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
-  OS7: 7.9.2009
-  OS7TAG: 7.9.2009
-  RL8: 8.8.20230518
-  RL8TAG: 8.8.20230518
+  RL8: 8.10.20240528
+  RL8TAG: 8.10.20240528
+  RL9: 9.7.20251123
+  RL9TAG: 9.7.20251123
   CI_COMMIT_SHORT_SHA_RL8: ${CI_COMMIT_SHORT_SHA}-rocky-8
+  CI_COMMIT_SHORT_SHA_RL9: ${CI_COMMIT_SHORT_SHA}-rocky-9
 
-centos7base:
+rocky9base:
   stage: base
   variables:
-    BASE: centos7base
+    BASE: rocky9base
   script:
-    - docker volume create $CI_COMMIT_SHORT_SHA
-    - docker-compose -f docker-compose.base.yml build --no-cache --pull $BASE
+    - docker volume create $CI_COMMIT_SHORT_SHA_RL9
+    - docker compose -f docker-compose.base.yml build --no-cache --pull $BASE
 
-rocky8base:
-  stage: base
-  variables:
-    BASE: rocky8base
-  script:
-    - docker volume create $CI_COMMIT_SHORT_SHA_RL8
-    - docker-compose -f docker-compose.base.yml build --no-cache --pull $BASE
-
-centos7kernelonly:
+rocky9kernelonly:
   stage: build
   timeout: 3h
   variables:
-    BUILD: centos7kernelonly
+    BUILD: rocky9kernelonly
   script:
-    - docker-compose build --no-cache $BUILD
-    - docker-compose run -v $CI_COMMIT_SHORT_SHA:/home/centos/rpmbuild/RPMS $BUILD
-    - docker-compose rm -f -v
+    - docker compose build --no-cache $BUILD
+    - docker compose run -v $CI_COMMIT_SHORT_SHA_RL9:/home/centos/rpmbuild/RPMS $BUILD
 
-rocky8kernelonly:
-  stage: build
-  timeout: 3h
-  variables:
-    BUILD: rocky8kernelonly
-  script:
-    - docker-compose build --no-cache $BUILD
-    - docker-compose run -v $CI_COMMIT_SHORT_SHA_RL8:/home/centos/rpmbuild/RPMS $BUILD
-
-centos7deploy:
+rocky9deploy:
   stage: deploy
   variables:
-    FTPTRAY_USER: centos-7
+    FTPTRAY_USER: rocky-9
     FTPTRAY_REPO: custom
   script:
-    - docker run --rm -v $CI_COMMIT_SHORT_SHA:/home/centos/rpmbuild/RPMS -e FTPTRAY_USER=$FTPTRAY_USER -e FTPTRAY_PASSWORD=$FTPTRAY_PASSWORD -e FTPTRAY_REPO=$FTPTRAY_REPO -e FTPTRAY_HOST=$FTPTRAY_HOST aursu/rpmbuild:ftptray /usr/local/bin/ftptray.py /home/centos/rpmbuild/RPMS
-
-rocky8deploy:
-  stage: deploy
-  variables:
-    FTPTRAY_USER: rocky-8
-    FTPTRAY_REPO: custom
-  script:
-    - docker run --rm -v $CI_COMMIT_SHORT_SHA_RL8:/home/centos/rpmbuild/RPMS -e FTPTRAY_USER=$FTPTRAY_USER -e FTPTRAY_PASSWORD=$FTPTRAY_PASSWORD -e FTPTRAY_REPO=$FTPTRAY_REPO -e FTPTRAY_HOST=$FTPTRAY_HOST aursu/rpmbuild:ftptray /usr/local/bin/ftptray.py /home/centos/rpmbuild/RPMS
+    - docker run --rm -v $CI_COMMIT_SHORT_SHA_RL9:/home/centos/rpmbuild/RPMS -e FTPTRAY_USER=$FTPTRAY_USER -e FTPTRAY_PASSWORD=$FTPTRAY_PASSWORD -e FTPTRAY_REPO=$FTPTRAY_REPO -e FTPTRAY_HOST=$FTPTRAY_HOST aursu/rpmbuild:ftptray /usr/local/bin/ftptray.py /home/centos/rpmbuild/RPMS

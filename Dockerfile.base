@@ -1,5 +1,5 @@
 # image comes from rpmbuild-libtool project
-ARG os=8.8.20230518
+ARG os=9.7.20251123
 FROM aursu/rpmbuild:${os}-build
 
 USER root
