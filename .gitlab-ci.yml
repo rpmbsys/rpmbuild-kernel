@@ -1,4 +1,4 @@
-image: aursu/rpmbuild:7.9.2009-docker
+image: ghcr.io/aursu/rpmbuild:10.1.20251126-docker-29.4.0
 
 stages:
   - base
