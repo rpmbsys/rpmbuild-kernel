@@ -7,8 +7,10 @@ RUN dnf -y install \
         asciidoc \
         audit-libs-devel \
         bc \
+        bindgen \
         binutils-devel \
         bpftool \
+        clippy \
         dwarves \
         elfutils-devel \
         gcc-plugin-devel \
@@ -29,8 +31,10 @@ RUN dnf -y install \
         pciutils-devel \
         perl-devel perl-generators "perl(ExtUtils::Embed)" \
         pesign \
-        python3-devel python3-docutils \
+        python3-devel python3-docutils python3-pyyaml \
+        rust rust-src rustfmt \
         kernel-rpm-macros \
+        system-sb-certs \
         xmlto \
         xz-devel \
         zlib-devel \
